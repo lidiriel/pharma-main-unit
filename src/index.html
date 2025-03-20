@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <link href="/static/css/style.css" rel="stylesheet">
+<!--	<link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">-->
+<!--	<link rel="stylesheet" href="lib/bootstrap/css/bootstrap-theme.min.css">-->
+<!--	<link rel="stylesheet" href="lib/highlight/styles/androidstudio.css">-->
+<!--	<link rel="stylesheet" href="lib/fontawesome/css/all.min.css">-->
+	<script src="/static/jquery-2.0.3.min.js"></script>
+<!--	<script src="lib/jquery.min.js"></script>-->
+<!--	<script src="lib/jquery-ui.min.js"></script>-->
+<!--	<script src="lib/js.cookie.js"></script>-->
+	<script src="/static/scripts.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        $("#generate-string").click(function(e) {
+          $.post("/generator", {"length": $("input[name='length']").val()})
+           .done(function(string) {
+            $("#the-string").show();
+            $("#the-string input").val(string);
+          });
+          e.preventDefault();
+        });
+
+        $("#replace-string").click(function(e) {
+          $.ajax({
+            type: "PUT",
+            url: "/generator",
+            data: {"another_string": $("#the-string input").val()}
+          })
+          .done(function() {
+            alert("Replaced!");
+          });
+          e.preventDefault();
+        });
+
+        $("#delete-string").click(function(e) {
+          $.ajax({
+            type: "DELETE",
+            url: "/generator"
+          })
+          .done(function() {
+            $("#the-string").hide();
+          });
+          e.preventDefault();
+        });
+      });
+    </script>
+  </head>
+
+  <body class="circuit-themes">
+	<h3>Compost Collaps Pharma generator</h3>
+<!--    <input type="text" value="8" name="length"/>-->
+<!--    <button id="generate-string">Give it now!</button>-->
+<!--    <div id="the-string">-->
+<!--      <input type="text" />-->
+<!--      <button id="replace-string">Replace</button>-->
+<!--      <button id="delete-string">Delete it</button>-->
+<!--    </div>-->
+	<div class="row">
+		<div id="leds-container"></div>
+	</div>
+	<div id="edit-buttons-container">
+        <button id="insert-button" title="Insert matrix into the animation">Insert</button>
+        <button id="update-button" title="Update matrix in the animation">Update</button>
+        <button id="delete-button" title="Delete matrix from the animation">Delete</button>
+        <label for="hex-input" style="padding: 0 10px 0 25px;">HEX </label>
+        <input id="hex-input" maxlength="4" placeholder="UINT16 HEX" title="Input matrix as a 16-bit number in HEX format">
+    </div>
+	<div class="row" style="padding: 5px;">
+		Use Drag-and-Drop to reorder matrices <span class="fa fa-hand-point-down"></span>
+	</div>
+	<div id="frames" class="row ui-sortable" style="clear: both; ">
+		<table class="frame" data-hex="0000000000000000">
+			<tbody><tr>
+				<td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td></tr><tr><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td></tr><tr><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td></tr><tr><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td></tr><tr><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td></tr><tr><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td></tr><tr><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td></tr><tr><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td></tr></tbody></table><table class="frame selected" data-hex="0000080836080800"><tbody><tr><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td></tr><tr><td class="item"></td><td class="item"></td><td class="item"></td><td class="item active"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td></tr><tr><td class="item"></td><td class="item"></td><td class="item"></td><td class="item active"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td></tr><tr><td class="item"></td><td class="item active"></td><td class="item active"></td><td class="item"></td><td class="item active"></td><td class="item active"></td><td class="item"></td><td class="item"></td></tr><tr><td class="item"></td><td class="item"></td><td class="item"></td><td class="item active"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td></tr><tr><td class="item"></td><td class="item"></td><td class="item"></td><td class="item active"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td></tr><tr><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td></tr><tr><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td><td class="item"></td></tr></tbody>
+		</table>
+	</div>
+  </body>
+</html>

@@ -1,0 +1,45 @@
+name: pharma-main-unit
+channels:
+  - conda-forge
+  - defaults
+  - https://repo.anaconda.com/pkgs/main
+  - https://repo.anaconda.com/pkgs/r
+dependencies:
+  - _libgcc_mutex=0.1=main
+  - _openmp_mutex=5.1=1_gnu
+  - aiohappyeyeballs=2.6.1=pyhd8ed1ab_0
+  - aiohttp=3.11.13=py313h8060acc_0
+  - aiosignal=1.3.2=pyhd8ed1ab_0
+  - attrs=25.1.0=pyh71513ae_0
+  - bzip2=1.0.8=h5eee18b_6
+  - ca-certificates=2025.2.25=h06a4308_0
+  - expat=2.6.4=h6a678d5_0
+  - frozenlist=1.5.0=py313h8060acc_1
+  - idna=3.10=pyhd8ed1ab_1
+  - ld_impl_linux-64=2.40=h12ee557_0
+  - libffi=3.4.4=h6a678d5_1
+  - libgcc=14.2.0=h767d61c_2
+  - libgcc-ng=14.2.0=h69a702a_2
+  - libgomp=14.2.0=h767d61c_2
+  - libmpdec=4.0.0=h5eee18b_0
+  - libstdcxx-ng=11.2.0=h1234567_1
+  - libuuid=1.41.5=h5eee18b_0
+  - multidict=6.1.0=py313h8060acc_2
+  - ncurses=6.4=h6a678d5_0
+  - openssl=3.4.1=h7b32b05_0
+  - pip=25.0=py313h06a4308_0
+  - propcache=0.2.1=py313h8060acc_1
+  - pymodbus=3.8.6=pyh5041855_0
+  - pyserial=3.5=pyhd8ed1ab_1
+  - python=3.13.2=hf623796_100_cp313
+  - python_abi=3.13=0_cp313
+  - readline=8.2=h5eee18b_0
+  - setuptools=75.8.0=py313h06a4308_0
+  - sqlite=3.45.3=h5eee18b_0
+  - tk=8.6.14=h39e8969_0
+  - tzdata=2025a=h04d1e81_0
+  - wheel=0.45.1=py313h06a4308_0
+  - xz=5.6.4=h5eee18b_1
+  - yarl=1.18.3=py313h8060acc_1
+  - zlib=1.2.13=h5eee18b_1
+prefix: /home/ludovic/anaconda3/envs/pharma-main-unit
