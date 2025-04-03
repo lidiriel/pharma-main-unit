@@ -12,6 +12,14 @@ $(function () {
 
     var $leds, $cols, $rows;
 	
+	function genHexString(len) {
+	    let output = '';
+	    for (let i = 0; i < len; ++i) {
+	        output += (Math.floor(Math.random() * 16)).toString(16);
+	    }
+	    return output;
+	}
+	
     function Bitmap(hexString) {
         let matrix = fromHexString(hexString);
 
@@ -434,6 +442,11 @@ $(function () {
 	
 	$deleteallButton.click(function () {
 		$frames.empty();
+	});
+	
+	$hexrandButton.click(function () {
+		$hexInput.val(genHexString(4));
+		hexInputToLeds();
 	});
 
     $('#output').on('paste', function (e) {
