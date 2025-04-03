@@ -165,7 +165,7 @@ $(function () {
 							if(generator.lookup_color_leds(i-1,j-1)=='b'){
 								color = "blue-leds";
 							}
-							console.log("bitnumber="+bitnumber+" byte="+byte);
+							//console.log("bitnumber="+bitnumber+" byte="+byte);
 		                    if (byte & (1 << (bitnumber-1))) {
 		                        out.push('<td class="'+color+' item active"></td>');
 		                    } else {
@@ -314,6 +314,8 @@ $(function () {
 			$("#prog").show();
 			var key = $("#prog").val();
 			$("#hex-list").val(data[key]);
+			var optionSelected = $("#prog").val();
+			loadOneSequence(optionSelected);
 		});
 	}
 	
@@ -321,10 +323,10 @@ $(function () {
 		console.log("load sequence name = ", name);
 		var posting = $.post("/load", {"sequence_name" : name});
 		posting.done(function(data) {
-			//$frames.empty();
+			$frames.empty();
 			$("#hex-list").val(data);
-			for (code in data){
-				console.log("code is ", code)
+			for (const code of data){
+				console.log("code is ", code);
 				var $newFrame = makeFrameElement(code);
 				insert_frame($newFrame);
 			}	
