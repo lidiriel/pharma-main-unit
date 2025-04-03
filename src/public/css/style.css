@@ -107,8 +107,8 @@ body.blue-leds #rows-list .item.hover {
 #insertrand-button,
 #hexrand-button,
 #deleteall-button,
-#hex-save,
-#prog-list,
+#hex_save,
+#prog_list,
 #insert-button {
     width: 95px;
     height: 30px;
@@ -200,7 +200,7 @@ body.blue-leds #rows-list .item.hover {
     overflow-y: scroll;
 }
 
-#hex-list {
+#hex_list {
 	display: block;
 	padding: 5px;
 	margin-top: 5px;

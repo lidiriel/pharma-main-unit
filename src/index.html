@@ -3,48 +3,11 @@
 <html>
   <head>
 	<link rel="stylesheet" href="/static/css/fontawesome.css">
-    <link href="/static/css/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+	<link rel="stylesheet" href="/static/jquery-ui-1.14.1/jquery-ui.css">
 	<script src="/static/jquery-ui-1.14.1/external/jquery/jquery.js"></script>
 	<script src="/static/jquery-ui-1.14.1/jquery-ui.min.js"></script>
 	<script src="/static/scripts.js"></script>
-<!--    <script type="text/javascript">-->
-<!--      $(document).ready(function() {-->
-<!--        $("#generate-string").click(function(e) {-->
-<!--          $.post("/generator", {"length": $("input[name='length']").val()})-->
-<!--           .done(function(string) {-->
-<!--            $("#the-string").show();-->
-<!--            $("#the-string input").val(string);-->
-<!--          });-->
-<!--          e.preventDefault();-->
-<!--        });-->
-
-<!--        $("#replace-string").click(function(e) {-->
-<!--          $.ajax({-->
-<!--            type: "PUT",-->
-<!--            url: "/generator",-->
-<!--            data: {"another_string": $("#the-string input").val()}-->
-<!--          })-->
-<!--          .done(function() {-->
-<!--            alert("Replaced!");-->
-<!--          });-->
-<!--          e.preventDefault();-->
-<!--        });-->
-
-<!--        $("#delete-string").click(function(e) {-->
-<!--          $.ajax({-->
-<!--            type: "DELETE",-->
-<!--            url: "/generator"-->
-<!--          })-->
-<!--          .done(function() {-->
-<!--            $("#the-string").hide();-->
-<!--          });-->
-<!--          e.preventDefault();-->
-<!--        });-->
-<!--      });-->
-<!--	   $( function() {-->
-<!--	     $( "#prog" ).selectmenu();-->
-<!--	   } );-->
-<!--    </script>-->
   </head>
 
   <body class="collaps-themes">
@@ -52,14 +15,20 @@
 	<div class="row">
 		<div id="leds-container"></div>
 	</div>
+	<div id="dialog-message-save" title="Sequence ?">
+	  <p>
+	    <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 50px 0;"></span>
+	    Your sequence have successfully saved.
+	  </p>
+	</div>
 	<form action="#">
 		<fieldset>
-			<label for="prog-list">Select a programmation</label>
-		  	<select name="prog-list" id="prog-list">
+			<label for="prog_list">Select a programmation</label>
+		  	<select name="prog_list" id="prog_list">
 		  	</select>
-			<label for="hex-save">change, reorganize and</label>
-		  	<button id="hex-save">save it !</button>
-			<textarea id="hex-list" rows="5" cols="50" readonly="readonly"></textarea>	
+			<label for="hex_save">change, reorganize and</label>
+		  	<button id="hex_save">save it !</button>
+			<textarea id="hex_list" name="hex_list" rows="5" cols="50" readonly="readonly"></textarea>	
 		</fieldset>
 	</form>
 

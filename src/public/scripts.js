@@ -2,16 +2,30 @@ $(function () {
     var $body = $('body');
     var $frames = $('#frames');
     var $hexInput = $('#hex-input');
-	var $hexList = $('#hex-list');
+	var $hexList = $('#hex_list');
     var $insertButton = $('#insert-button');
 	var $insertrandButton = $('#insertrand-button');
 	var $hexrandButton = $('#hexrand-button');
     var $deleteButton = $('#delete-button');
     var $updateButton = $('#update-button');
 	var $deleteallButton = $('#deleteall-button');
-	var $progSelect = $('#prog-list');
+	var $progSelect = $('#prog_list');
+	var $saveButton = $('#hex_save');
+	var $dialogSave = $('#dialog-message-save');
 
     var $leds, $cols, $rows;
+	
+	function dialogSave(sequence_name) {
+	  $dialogSave.attr('title',sequence_name);
+	  $dialogSave.dialog({
+	    modal: true,
+	    buttons: {
+	      Ok: function() {
+	        $( this ).dialog( "close" );
+	      }
+	    }
+	  });
+	}
 	
 	function genHexString(len) {
 	    let output = '';
@@ -289,20 +303,6 @@ $(function () {
 		}
     }
 
-    var savedHashState;
-
-//    function printArduinoCode(patterns) {
-//        if (patterns.length) {
-//            var code;
-//            if ($('#images-as-byte-arrays').prop("checked")) {
-//                code = converter.patternsToCodeBytesArray(patterns);
-//            } else {
-//                code = converter.patternsToCodeUint64Array(patterns);
-//            }
-//            $('#output').val(code);
-//        }
-//    }
-
     function framesToPatterns() {
         var out = [];
         $frames.find('.frame').each(function () {
@@ -350,27 +350,6 @@ $(function () {
 		});
 		
 	}
-
-
-
-	
-	
-//    function loadState() {
-//        savedHashState = window.location.hash.slice(1);
-//        $frames.empty();
-//        var frame;
-//        var patterns = savedHashState.split('|');
-//        patterns = converter.fixPatterns(patterns);
-//
-//        for (var i = 0; i < patterns.length; i++) {
-//            frame = makeFrameElement(patterns[i]);
-//            $frames.append(frame);
-//        }
-//        frame.addClass('selected');
-//        $hexInput.val(frame.attr('data-hex'));
-//        //printArduinoCode(patterns);
-//        //hexInputToLeds();
-//    }
 
     function getInputHexValue() {
         var hexval = converter.fixPattern($hexInput.val());
@@ -473,32 +452,25 @@ $(function () {
 		var $newFrame = makeFrameElement(getInputHexValue());
 		insert_frame($newFrame);
 	});
+	
+	
+	$saveButton.click(function (event) {
+		event.preventDefault();
+		var sequence_name = $progSelect.val();
+		var posting = $.post("/save", {"sequence_name" : sequence_name, "sequence_value" : $hexList.val()});
+			posting.done(function(data) {
+				console.log("save ok for ", sequence_name);
+				dialogSave(sequence_name);
+			}).fail(function() {
+			    alert( "error please retry." );
+			})
+	});
 
-//    $('#output').on('paste', function (e) {
-//        var value = e.originalEvent.clipboardData.getData('text');
-//
-//        const hash = parseArduinoCode(value);
-//        if (hash) {
-//            location.hash = hash;
-//        } else {
-//            alert("Couldn't parse pasted code as valid LED Matrix Editor-generated C ;(");
-//        }
-//    });
-//
-//    $('#output').focus(function() {
-//        $(this).select();
-//    });
-
-    
 	$( function() {
-		$progSelect.selectmenu();
-		
 		$progSelect.change( function (e) {
 			var optionSelected = $progSelect.val();
 			loadOneSequence(optionSelected);
 		});
-		
-		
 	} );
 
     $frames.sortable({
@@ -506,6 +478,8 @@ $(function () {
             saveState();
         }
     });
+	
+	$dialogSave.hide();
 
 	loadAllSequences();
 
