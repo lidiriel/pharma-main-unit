@@ -2,9 +2,13 @@ $(function () {
     var $body = $('body');
     var $frames = $('#frames');
     var $hexInput = $('#hex-input');
+	var $hexList = $('#hex-list');
     var $insertButton = $('#insert-button');
+	var $insertrandButton = $('#insertrand-button');
+	var $hexrandButton = $('#hexrand-button');
     var $deleteButton = $('#delete-button');
     var $updateButton = $('#update-button');
+	var $deleteallButton = $('#deleteall-button');
 
     var $leds, $cols, $rows;
 	
@@ -290,26 +294,56 @@ $(function () {
 
     function saveState() {
         var patterns = framesToPatterns();
-        //printArduinoCode(patterns);
         window.location.hash = savedHashState = patterns.join('|');
     }
 
-    function loadState() {
-        savedHashState = window.location.hash.slice(1);
-        $frames.empty();
-        var frame;
-        var patterns = savedHashState.split('|');
-        patterns = converter.fixPatterns(patterns);
+	function loadAllSequences() {
+		var posting = $.post("/load", {"sequence_name" : ""});
+		posting.done(function(data) {
+			for(seq_name in data){
+				$("#prog").append(new Option(seq_name, seq_name));
+			}
+			$("#prog").show();
+			var key = $("#prog").val();
+			$("#hex-list").val(data[key]);
+		});
+	}
+	
+	function loadOneSequence(name) {
+		console.log("load sequence name = ", name);
+		var posting = $.post("/load", {"sequence_name" : name});
+		posting.done(function(data) {
+			//$frames.empty();
+			$("#hex-list").val(data);
+			for (code in data){
+				console.log("code is ", code)
+				var $newFrame = makeFrameElement(code);
+				insert_frame($newFrame);
+			}	
+		});
+		
+	}
 
-        for (var i = 0; i < patterns.length; i++) {
-            frame = makeFrameElement(patterns[i]);
-            $frames.append(frame);
-        }
-        frame.addClass('selected');
-        $hexInput.val(frame.attr('data-hex'));
-        //printArduinoCode(patterns);
-        //hexInputToLeds();
-    }
+
+
+	
+	
+//    function loadState() {
+//        savedHashState = window.location.hash.slice(1);
+//        $frames.empty();
+//        var frame;
+//        var patterns = savedHashState.split('|');
+//        patterns = converter.fixPatterns(patterns);
+//
+//        for (var i = 0; i < patterns.length; i++) {
+//            frame = makeFrameElement(patterns[i]);
+//            $frames.append(frame);
+//        }
+//        frame.addClass('selected');
+//        $hexInput.val(frame.attr('data-hex'));
+//        //printArduinoCode(patterns);
+//        //hexInputToLeds();
+//    }
 
     function getInputHexValue() {
         var hexval = converter.fixPattern($hexInput.val());
@@ -320,7 +354,7 @@ $(function () {
     function onFrameClick() {
         $hexInput.val($(this).attr('data-hex'));
         processToSave($(this));
-        //hexInputToLeds();
+        hexInputToLeds();
     }
 
     function processToSave($focusToFrame) {
@@ -334,44 +368,19 @@ $(function () {
             $deleteButton.attr('disabled', 'disabled');
             $updateButton.attr('disabled', 'disabled');
         }
-        //saveState();
+        saveState();
     }
+	
+	function insert_frame($newFrame){
+		var $selectedFrame = $frames.find('.frame.selected').first();
+        if ($selectedFrame.length) {
+            $selectedFrame.after($newFrame);
+        } else {
+            $frames.append($newFrame);
+        }
+        processToSave($newFrame);
+	}
 
-//    function parseArduinoCode(text) {
-//        // Matches the uint64_t-based code output (and more)
-//        const UINT64_REGEX = /const\s+uint64_t\s+(\w+)\s*\[\s*\]\s*=\s*{((?:.|\r|\n)*)}\s*;/;
-//        // Matches uint8_t/byte-based code output (and more)
-//        const UINT8_REGEX = /const\s+(?:uint8_t|byte)\s+(\w+)\s*\[\s*\]\s*\[\s*8\s*\]\s*=\s*{((?:.|\r|\n)*)}\s*;/;
-//
-//        // List of 16 char-long hex strings representing the matrices as they appear in the URL hash
-//        let matrices;
-//
-//        let match;
-//        if (match = UINT64_REGEX.exec(text)) {
-//            matrices = Array.from(match[2].matchAll(/0x([0-9a-zA-Z]{16})/g)).map(match => match[1]);
-//        } else if (match = UINT8_REGEX.exec(text)) {
-//            let bytesStr = Array.from(match[2].matchAll(/(?:0b|0B|B)([01]{8})/g)).map(match => match[1]);
-//            if (bytesStr.length % 8 !== 0) return null;
-//            let bytes = bytesStr.map(
-//                b => parseInt(b.split('').reverse().join(''), 2).toString(16).padStart(2, '0')
-//            );
-//
-//            // Split the parsed numbers into groups of 8 elements (each group being a matrix)
-//            let groups = [];
-//            while (bytes.length) {
-//                groups.push(bytes.splice(0, 8));
-//            }
-//
-//            matrices = groups.map(g => g.reverse().join(''));
-//        } else {
-//            return null;
-//        }
-//
-//        return matrices.join('|');
-//    }
-
-//    $('#cols-container').append($(generator.tableCols()));
-//    $('#rows-container').append($(generator.tableRows()));
 	$('#leds-container').append($(generator.tableLeds()));
 
     $leds = $('#leds-container');
@@ -407,15 +416,7 @@ $(function () {
 
     $insertButton.click(function () {
         var $newFrame = makeFrameElement(getInputHexValue());
-        var $selectedFrame = $frames.find('.frame.selected').first();
-
-        if ($selectedFrame.length) {
-            $selectedFrame.after($newFrame);
-        } else {
-            $frames.append($newFrame);
-        }
-
-        processToSave($newFrame);
+		insert_frame($newFrame);
     });
 
     $updateButton.click(function () {
@@ -430,12 +431,10 @@ $(function () {
 
         processToSave($newFrame);
     });
-
-//    $('#images-as-byte-arrays').change(function () {
-//        var patterns = framesToPatterns();
-//        printArduinoCode(patterns);
-//    });
-
+	
+	$deleteallButton.click(function () {
+		$frames.empty();
+	});
 
     $('#output').on('paste', function (e) {
         var value = e.originalEvent.clipboardData.getData('text');
@@ -453,19 +452,23 @@ $(function () {
     });
 
     
-    $(window).on('hashchange', function () {
-        if (window.location.hash.slice(1) != savedHashState) {
-            loadState();
+	$( function() {
+		$("#prog").selectmenu();
+		
+		$("#prog").change( function (e) {
+			var optionSelected = $("#prog").val();
+			loadOneSequence(optionSelected);
+		});
+		
+		
+	} );
+
+    $frames.sortable({
+        stop: function (event, ui) {
+            saveState();
         }
     });
 
-//    $frames.sortable({
-//        stop: function (event, ui) {
-//            saveState();
-//        }
-//    });
-
-    loadState();
-
+	loadAllSequences();
 
 });

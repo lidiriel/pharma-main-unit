@@ -12,8 +12,7 @@ body {
 
 
 .row {
-  margin-left:-5px;
-  margin-right:-5px;
+  margin: 5px;
 }
   
 .column {
@@ -88,7 +87,6 @@ body.blue-leds #rows-list .item.hover {
 #hex-input {
     text-align: center;
     width: 150px;
-    height: 30px;
     padding: 5px;
 }
 
@@ -104,12 +102,15 @@ body.blue-leds #rows-list .item.hover {
     height: 130px;
 }
 
-#insert-button,
 #update-button,
-#delete-button {
-    width: 75px;
+#delete-button,
+#insertrand-button,
+#hexrand-button,
+#deleteall-button,
+#insert-button {
+    width: 95px;
     height: 30px;
-    margin: 0 10px;
+    margin: 0 5px;
 }
 
 #rotate-button,
@@ -141,12 +142,12 @@ body.blue-leds #rows-list .item.hover {
     box-shadow: 0 0 1px #cccccc;
 }
 
-#circuit-theme {
+#collaps-theme {
     display: inline-block;
     width: 25px;
     height: 25px;
     cursor: pointer;
-    background-image: url('img/circuit-icon.png');
+    background-image: url('img/collaps-icon.png');
     margin-left: 25px;
 }
 
@@ -188,14 +189,22 @@ body.blue-leds #rows-list .item.hover {
     overflow-y: scroll;
 }
 
+#hex-list {
+	display: block;
+	padding: 5px;
+	margin-top: 5px;
+   	box-sizing: border-box;
+	width: 100%;
+}
+
 /*Themes*/
 
-.circuit-theme #circuit {
-    background-image: url('img/circuit.jpg');
+.collaps-theme #collaps {
+    background-image: url('img/collaps.jpg');
     padding: 5px;
 }
 
-.circuit-theme #matrix {
+.collaps-theme #matrix {
     color: white;
     border: solid 1px #547eae;
     background-color: #26477a;
@@ -203,27 +212,24 @@ body.blue-leds #rows-list .item.hover {
     margin: 10px;
 }
 
-.circuit-theme #leds-container {
+.collaps-theme #leds-container {
     border: solid 1px #808080;
 }
 
-.circuit-theme #player,
-.circuit-theme #shift-buttons-container,
-.circuit-theme #edit-buttons-container {
+.collaps-theme #player,
+.collaps-theme #shift-buttons-container,
+.collaps-theme #edit-buttons-container {
     background-color: #26477a;
     border: solid 1px #547eae;
     box-shadow: 10px 10px 10px #333;
 
 }
 
-.circuit-theme #player label,
-.circuit-theme #ms,
-.circuit-theme #shift-buttons-container label,
-.circuit-theme #edit-buttons-container label {
-    color: white;
-}
-
-#circuit, #frames {
+#frames {
     user-select: none;
     -webkit-user-select: none;
+}
+
+#prog {
+	display: inline-block;
 }
