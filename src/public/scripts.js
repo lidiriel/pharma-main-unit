@@ -9,6 +9,7 @@ $(function () {
     var $deleteButton = $('#delete-button');
     var $updateButton = $('#update-button');
 	var $deleteallButton = $('#deleteall-button');
+	var $progSelect = $('#prog-list');
 
     var $leds, $cols, $rows;
 	
@@ -231,7 +232,7 @@ $(function () {
 
     function makeFrameElement(pattern) {
         pattern = converter.fixPattern(pattern);
-		console.log("make frame pattern="+pattern);
+		//console.log("make frame pattern="+pattern);
         return $(converter.patternToFrame(pattern)).click(onFrameClick);
     }
 
@@ -309,12 +310,12 @@ $(function () {
 		var posting = $.post("/load", {"sequence_name" : ""});
 		posting.done(function(data) {
 			for(seq_name in data){
-				$("#prog").append(new Option(seq_name, seq_name));
+				$progSelect.append(new Option(seq_name, seq_name));
 			}
-			$("#prog").show();
-			var key = $("#prog").val();
-			$("#hex-list").val(data[key]);
-			var optionSelected = $("#prog").val();
+			$progSelect.show();
+			var key = $progSelect.val();
+			$hexList.val(data[key]);
+			var optionSelected = $progSelect.val();
 			loadOneSequence(optionSelected);
 		});
 	}
@@ -324,12 +325,18 @@ $(function () {
 		var posting = $.post("/load", {"sequence_name" : name});
 		posting.done(function(data) {
 			$frames.empty();
-			$("#hex-list").val(data);
+			$hexList.val(data);
 			for (const code of data){
-				console.log("code is ", code);
+				//console.log("code is ", code);
 				var $newFrame = makeFrameElement(code);
 				insert_frame($newFrame);
-			}	
+			}
+			// update with selected
+			let selectedFrame = $frames.find('.frame.selected').first();
+			let current_hex = selectedFrame.attr('data-hex');
+			$hexInput.val(current_hex);
+			//processToSave($(this));
+			hexInputToLeds();
 		});
 		
 	}
@@ -451,27 +458,27 @@ $(function () {
 		hexInputToLeds();
 	});
 
-    $('#output').on('paste', function (e) {
-        var value = e.originalEvent.clipboardData.getData('text');
-
-        const hash = parseArduinoCode(value);
-        if (hash) {
-            location.hash = hash;
-        } else {
-            alert("Couldn't parse pasted code as valid LED Matrix Editor-generated C ;(");
-        }
-    });
-
-    $('#output').focus(function() {
-        $(this).select();
-    });
+//    $('#output').on('paste', function (e) {
+//        var value = e.originalEvent.clipboardData.getData('text');
+//
+//        const hash = parseArduinoCode(value);
+//        if (hash) {
+//            location.hash = hash;
+//        } else {
+//            alert("Couldn't parse pasted code as valid LED Matrix Editor-generated C ;(");
+//        }
+//    });
+//
+//    $('#output').focus(function() {
+//        $(this).select();
+//    });
 
     
 	$( function() {
-		$("#prog").selectmenu();
+		$progSelect.selectmenu();
 		
-		$("#prog").change( function (e) {
-			var optionSelected = $("#prog").val();
+		$progSelect.change( function (e) {
+			var optionSelected = $progSelect.val();
 			loadOneSequence(optionSelected);
 		});
 		
