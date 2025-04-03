@@ -183,6 +183,15 @@ body.blue-leds #rows-list .item.hover {
     border-color: #3399ff;
 }
 
+#frames .command {
+	width: 100px;
+	text-align: center;
+	display: inline-block;
+	float: left;
+	padding: 10px;
+	color: white;
+}
+
 #output {
     font-family: "Bitstream Vera Sans Mono", Monaco, "Courier New", Courier, monospace;
     resize: none;
@@ -226,6 +235,7 @@ body.blue-leds #rows-list .item.hover {
     box-shadow: 10px 10px 10px #333;
 
 }
+
 
 #frames {
     user-select: none;

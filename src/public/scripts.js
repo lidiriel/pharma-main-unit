@@ -151,32 +151,36 @@ $(function () {
     var converter = {
         patternToFrame: function (pattern) {
 			var out = ['<div class="frame" data-hex="' + pattern + '">'];
-			for(var cross = 1; cross < 3; cross++){
-				out.push('<table class="column">');
-				var byte = pattern.substr((cross-1)*2, 2);
-				byte = parseInt(byte, 16);
-				for (var i = 1; i < 6; i++) {
-	                out.push('<tr>');
-	                for (var j = 1; j < 6; j++) {
-						let bitnumber = generator.lookup_leds_bits(i-1,j-1);
-						if(bitnumber == 0){
-							out.push('<td class="null"></td>');
-						}else{
-							let color = "green-leds";
-							if(generator.lookup_color_leds(i-1,j-1)=='b'){
-								color = "blue-leds";
-							}
-							//console.log("bitnumber="+bitnumber+" byte="+byte);
-		                    if (byte & (1 << (bitnumber-1))) {
-		                        out.push('<td class="'+color+' item active"></td>');
-		                    } else {
-		                        out.push('<td class="item"></td>');
-	                    	}
-	                	}
+			if(pattern == 'RAND'){
+				out.push('<div class="command">RAND</div>');
+			}else{
+				for(var cross = 1; cross < 3; cross++){
+					out.push('<table class="column">');
+					var byte = pattern.substr((cross-1)*2, 2);
+					byte = parseInt(byte, 16);
+					for (var i = 1; i < 6; i++) {
+		                out.push('<tr>');
+		                for (var j = 1; j < 6; j++) {
+							let bitnumber = generator.lookup_leds_bits(i-1,j-1);
+							if(bitnumber == 0){
+								out.push('<td class="null"></td>');
+							}else{
+								let color = "green-leds";
+								if(generator.lookup_color_leds(i-1,j-1)=='b'){
+									color = "blue-leds";
+								}
+								//console.log("bitnumber="+bitnumber+" byte="+byte);
+			                    if (byte & (1 << (bitnumber-1))) {
+			                        out.push('<td class="'+color+' item active"></td>');
+			                    } else {
+			                        out.push('<td class="item"></td>');
+		                    	}
+		                	}
+						}
+		                out.push('</tr>');
+		            }
+            		out.push('</table>');
 					}
-	                out.push('</tr>');
-	            }
-            	out.push('</table>');
 			}
 			out.push('</div>');
             return out.join('');
@@ -219,6 +223,9 @@ $(function () {
             return out.join('');
         },
         fixPattern: function (pattern) {
+			if(pattern == 'RAND'){
+				return pattern;
+			}
             pattern = pattern.replace(/[^0-9a-fA-F]/g, '0');
             return ('0000' + pattern).substr(-4);
         },
@@ -263,6 +270,9 @@ $(function () {
 
     function hexInputToLeds() {
         var val = getInputHexValue();
+		if(val == 'RAND'){
+			val = '0000';
+		}
 		for(var c=1; c<3; c++){
 			var byte = val.substr((c-1)*2, 2);
 			byte = parseInt(byte, 16);
@@ -281,17 +291,17 @@ $(function () {
 
     var savedHashState;
 
-    function printArduinoCode(patterns) {
-        if (patterns.length) {
-            var code;
-            if ($('#images-as-byte-arrays').prop("checked")) {
-                code = converter.patternsToCodeBytesArray(patterns);
-            } else {
-                code = converter.patternsToCodeUint64Array(patterns);
-            }
-            $('#output').val(code);
-        }
-    }
+//    function printArduinoCode(patterns) {
+//        if (patterns.length) {
+//            var code;
+//            if ($('#images-as-byte-arrays').prop("checked")) {
+//                code = converter.patternsToCodeBytesArray(patterns);
+//            } else {
+//                code = converter.patternsToCodeUint64Array(patterns);
+//            }
+//            $('#output').val(code);
+//        }
+//    }
 
     function framesToPatterns() {
         var out = [];
@@ -303,7 +313,7 @@ $(function () {
 
     function saveState() {
         var patterns = framesToPatterns();
-        window.location.hash = savedHashState = patterns.join('|');
+        $hexList.val(patterns.join(','));
     }
 
 	function loadAllSequences() {
@@ -456,6 +466,12 @@ $(function () {
 	$hexrandButton.click(function () {
 		$hexInput.val(genHexString(4));
 		hexInputToLeds();
+	});
+	
+	$insertrandButton.click(function () {
+		$hexInput.val('RAND');	
+		var $newFrame = makeFrameElement(getInputHexValue());
+		insert_frame($newFrame);
 	});
 
 //    $('#output').on('paste', function (e) {
