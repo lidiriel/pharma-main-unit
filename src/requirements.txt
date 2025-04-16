@@ -1,3 +1,5 @@
 CherryPy==18.10.0
 minimalmodbus==2.1.1
-pyaudio==0.2.14
+numpy==2.2.4
+PyAudio==0.2.14
+pymodbus==3.9.1
