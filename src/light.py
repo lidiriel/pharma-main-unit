@@ -1,71 +1,53 @@
-import serial
 import RPi.GPIO as GPIO
-from time import sleep
-from pymodbus.client.serial import ModbusSerialClient
+import time
+from pymodbus.client.sync import ModbusSerialClient
 
-# Broche GPIO pour le contrôle DE/RE du module RS485
-RS485_CONTROL_PIN = 18  # GPIO18 correspond à la broche physique 12
+# --- Configuration RS485 ---
+RS485_CONTROL_PIN = 18  # GPIO BCM 18 = broche physique 12
 
-# Configuration GPIO
+GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(RS485_CONTROL_PIN, GPIO.OUT)
-GPIO.output(RS485_CONTROL_PIN, GPIO.LOW)  # Commence en réception
+GPIO.output(RS485_CONTROL_PIN, GPIO.LOW)  # Mode réception par défaut
 
+def pre_transmission():
+    GPIO.output(RS485_CONTROL_PIN, GPIO.HIGH)  # Passage en émission
+    time.sleep(0.001)
 
+def post_transmission():
+    time.sleep(0.001)  # Laisse le temps de finir d’émettre
+    GPIO.output(RS485_CONTROL_PIN, GPIO.LOW)   # Retour en réception
 
-class RS485ModbusClient(ModbusSerialClient):
-    def __init__(self, *args, rs485_pin=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.rs485_pin = rs485_pin
-        if rs485_pin is not None:
-            GPIO.setmode(GPIO.BCM)
-            GPIO.setup(rs485_pin, GPIO.OUT)
-            GPIO.output(rs485_pin, GPIO.LOW)  # Commencer en réception
-
-    def _send(self, request):
-        # Passage en émission
-        if self.rs485_pin is not None:
-            GPIO.output(self.rs485_pin, GPIO.HIGH)
-            sleep(0.001)
-
-        result = super()._send(request)
-
-        # Retour en réception
-        if self.rs485_pin is not None:
-            sleep(0.001)
-            GPIO.output(self.rs485_pin, GPIO.LOW)
-
-        return result
-
-
-# Création du client Modbus
-client = RS485ModbusClient(
+# --- Configuration du client Modbus RTU ---
+client = ModbusSerialClient(
+    method='rtu',
     port='/dev/ttyAMA0',
     baudrate=38400,
-    timeout=1,
+    parity='N',
     stopbits=1,
     bytesize=8,
-    parity='N'
+    timeout=1
 )
 
-# Connexion
-if not client.connect():
-    print("Erreur de connexion au bus Modbus.")
-    exit(1)
+# Assignation des callbacks RS485
+client.pre_transmission = pre_transmission
+client.post_transmission = post_transmission
 
+# --- Connexion et envoi ---
+if client.connect():
+    print("✅ Connecté au port série.")
+    
+    # Envoi de la valeur 0xFF00 dans le registre 0 de l'esclave ID 1
+    response = client.write_register(address=0, value=0xFF00, unit=1)
 
-# Envoi de la valeur
-slave_id = 1
-register_address = 0
-value = 0xFF00
+    if response.isError():
+        print("❌ Erreur Modbus :", response)
+    else:
+        print("✅ Écriture réussie :", response)
 
-response = client.write_register(register_address, value, slave=slave_id)
-
-if response.isError():
-    print("Erreur lors de l'écriture Modbus :", response)
+    client.close()
 else:
-    print("Écriture réussie :", response)
+    print("❌ Impossible de se connecter au port série.")
 
-# Nettoyage
-client.close()
+# --- Nettoyage GPIO ---
 GPIO.cleanup()
