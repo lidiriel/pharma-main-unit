@@ -1,38 +1,24 @@
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 import time
 from pymodbus.client.sync import ModbusSerialClient
-from pymodbus.transaction import ModbusRtuFramer
+import serial.rs485
+import wiringpi
+import RPiRS485
 
-RS485_CONTROL_PIN = 18
+RS485_CONTROL_PIN = 17
 
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(RS485_CONTROL_PIN, GPIO.OUT)
-GPIO.output(RS485_CONTROL_PIN, GPIO.LOW)
+#GPIO.setwarnings(False)
+#GPIO.setmode(GPIO.BCM)
+#GPIO.setup(RS485_CONTROL_PIN, GPIO.OUT)
+#GPIO.output(RS485_CONTROL_PIN, GPIO.LOW)
+wiringpi.wiringPiSetup()
+wiringpi.pinMode(RS485_CONTROL_PIN, wiringpi.OUTPUT)
 
-def pre_transmission():
-    print("[GPIO] → Émission")
-    GPIO.output(RS485_CONTROL_PIN, GPIO.HIGH)
-    time.sleep(0.001)
 
-def post_transmission():
-    time.sleep(0.001)
-    GPIO.output(RS485_CONTROL_PIN, GPIO.LOW)
-    print("[GPIO] → Réception")
+ser=RPiRS485.RPiRS485(port='/dev/ttyAMA0',baudrate=38400,stopbits=1,timeout=0.1)
+client = ModbusSerialClient(method='rtu')
+client.socket = ser
 
-client = ModbusSerialClient(
-    method='rtu',
-    port='/dev/ttyAMA0',
-    baudrate=38400,
-    parity='N',
-    stopbits=1,
-    bytesize=8,
-    timeout=1,
-    framer=ModbusRtuFramer
-)
-
-client.pre_transmission = pre_transmission
-client.post_transmission = post_transmission
 
 if client.connect():
     print("✅ Connecté")
@@ -48,4 +34,4 @@ if client.connect():
 else:
     print("❌ Erreur de connexion")
 
-GPIO.cleanup()
+#GPIO.cleanup()
