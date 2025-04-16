@@ -4,6 +4,7 @@ from pymodbus.client.sync import ModbusSerialClient
 import serial.rs485
 import wiringpi
 import RPiRS485
+import random
 
 RS485_DE_PIN = 17
 wiringpi.wiringPiSetup()
@@ -14,11 +15,14 @@ ser=RPiRS485.RPiRS485(port='/dev/ttyAMA0',baudrate=38400,stopbits=1,timeout=1,de
 client = ModbusSerialClient(method='rtu')
 client.socket = ser
 
+code = random.randint(0,255)
+code = code << 8
+print(f"send code 0x{code:04x}")
 
 if client.connect():
     print("✅ Connecté")
-
-    response = client.write_register(0, 0xFF00, unit=2)
+    
+    response = client.write_register(0, code, unit=2)
 
     if response.isError():
         print("❌ Erreur :", response)
