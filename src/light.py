@@ -11,19 +11,18 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(RS485_CONTROL_PIN, GPIO.OUT)
 GPIO.output(RS485_CONTROL_PIN, GPIO.LOW)  # Commence en réception
 
-# Fonction pour contrôler l'interface RS485
+# Fonctions pour contrôle de direction RS485
 def pre_transmission():
-    GPIO.output(RS485_CONTROL_PIN, GPIO.HIGH)  # Passage en émission
+    GPIO.output(RS485_CONTROL_PIN, GPIO.HIGH)
     sleep(0.001)
 
 def post_transmission():
     sleep(0.001)
-    GPIO.output(RS485_CONTROL_PIN, GPIO.LOW)   # Retour en réception
+    GPIO.output(RS485_CONTROL_PIN, GPIO.LOW)
 
-# Création du client Modbus
+# Création du client Modbus (sans le paramètre 'method')
 client = ModbusClient(
-    method='rtu',
-    port='/dev/ttyAMA0',  # Interface UART du Raspberry Pi
+    port='/dev/ttyAMA0',
     baudrate=9600,
     timeout=1,
     stopbits=1,
@@ -31,17 +30,17 @@ client = ModbusClient(
     parity='N'
 )
 
-# Connexion au bus
+# Connexion
 if not client.connect():
     print("Erreur de connexion au bus Modbus.")
     exit(1)
 
-# Affectation des callbacks pour le contrôle RS485
+# Ajout des callbacks
 client.pre_transmission = pre_transmission
 client.post_transmission = post_transmission
 
-# Envoi de la valeur 0xFF00 dans le registre 0 de l'esclave 1
-slave_id = 0
+# Envoi de la valeur
+slave_id = 1
 register_address = 0
 value = 0xFF00
 
