@@ -3,6 +3,9 @@ import pyaudio
 from collections import deque
 import time
 from time import perf_counter
+import time
+import I2C_LCD_driver
+mylcd = I2C_LCD_driver.lcd()
 
 # === Paramètres audio ===
 import argparse
@@ -10,14 +13,15 @@ import argparse
 parser = argparse.ArgumentParser(description="Détection de beats audio en console")
 parser.add_argument('--min_freq', type=float, default=0.0, help="Fréquence minimale à analyser (Hz)")
 parser.add_argument('--max_freq', type=float, default=6000.0, help="Fréquence maximale à analyser (Hz)")
-parser.add_argument('--min_energy', type=float, default=1e9, help="Seuil minimal absolu d'énergie pour ignorer les bandes faibles")
+parser.add_argument('--min_energy', type=float, default=1e5, help="Seuil minimal absolu d'énergie pour ignorer les bandes faibles")
 parser.add_argument('--debug', action='store_true')
 parser.set_defaults(debug=False)
 args = parser.parse_args()
 
 CHUNK = 1024
 RATE = 44100
-DEVICE_NAME = "loopback_capture"  # À adapter si besoin
+#DEVICE_NAME = "loopback_capture"  # À adapter si besoin
+DEVICE_NAME = "USB"
 CHANNELS = 1
 N_BANDS = 64
 ENERGY_HISTORY = 42
@@ -127,8 +131,11 @@ try:
         # Affichage console : une ligne de 32 caractères représentant les beats
         visual = ''.join(['#' if i in filtered_indices and beat_detected[i] else '-' for i in range(N_BANDS)])
         print(visual)
+        mylcd.lcd_display_string(visual[:16])
         if args.debug:
-             print('-' * 80)
+            print('-' * 80)
+            mylcd.lcd_clear()
+            
         
 
         #time.sleep(0.03)  # ~30 FPS
