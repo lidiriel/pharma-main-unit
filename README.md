@@ -5,12 +5,4 @@ Compostcollaps is a musician come from the XXII century. He use our rubbish to c
 
 In this project we reuse a old pharmacy cross light to illuminate the show.
 
-We use a RPi2 to control the two cross units.
-
-login/password :  compost/collaps
-
-
-conda env export > environment.yml
-
-starting cherrypy web application :
-python webctrl.py
+See wiki for more details.
