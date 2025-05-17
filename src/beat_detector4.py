@@ -4,8 +4,6 @@ from collections import deque
 import time
 from time import perf_counter
 import time
-import I2C_LCD_driver
-mylcd = I2C_LCD_driver.lcd()
 
 # === Paramètres audio ===
 import argparse
@@ -19,9 +17,8 @@ parser.set_defaults(debug=False)
 args = parser.parse_args()
 
 CHUNK = 1024
-RATE = 44100
-#DEVICE_NAME = "loopback_capture"  # À adapter si besoin
-DEVICE_NAME = "USB"
+RATE = 96000
+DEVICE_NAME = "ADCWM8782"
 CHANNELS = 1
 N_BANDS = 64
 ENERGY_HISTORY = 42
@@ -87,7 +84,7 @@ for i, (start, end) in enumerate(bands):
 
 
 prev_beat = perf_counter()
-
+beats_empty = [0]*N_BANDS 
 # === Boucle principale console ===
 try:
     print("[INFO] Analyse en cours... Appuyez sur Ctrl+C pour quitter.")
@@ -96,45 +93,42 @@ try:
         samples = np.frombuffer(data, dtype=np.int16).astype(np.float32)
         spectrum = np.abs(np.fft.rfft(samples, n=CHUNK))
 
-        beat_detected = [0]*N_BANDS
+        beats_detected = beats_empty
         #cfactor = []
-        for idx, i in enumerate(filtered_indices):
+        for idx, iband in enumerate(filtered_indices):
             start, end = filtered_bands[idx]
             band_weight = (end - start) / CHUNK
             energy = band_weight * np.sum(spectrum[start:end] ** 2)
             if energy < args.min_energy:
                 beat = False
-                energy_history[i].append(energy)
+                energy_history[iband].append(energy)
                 #beat_detected[i] = 0
                 continue
-            energy_history[i].append(energy)
+            energy_history[iband].append(energy)
 
-            mean = np.mean(energy_history[i])
-            var = np.var(energy_history[i])
+            mean = np.mean(energy_history[iband])
+            var = np.var(energy_history[iband])
             current_cfactor = -15*var+1.55
             beat = energy > current_cfactor * mean
-            beat_detected[i] = (1 if beat else 0)
-            #cfactor.append(current_cfactor)
+            beats_detected[iband] = (1 if beat else 0)
             if args.debug:
-                print(f"Bande {i:02d} | Energie: {energy_history[i][-1]:.2e} | Moyenne: {mean:.2e} | Variance: {var:.2e} | Cfact: {current_cfactor:.2e} | Beat: {'OUI' if beat_detected[i] else '-'}")
+                print(f"Bande {iband:02d} | Energie: {energy_history[iband][-1]:.2e} | Moyenne: {mean:.2e} | Variance: {var:.2e} | Cfact: {current_cfactor:.2e} | Beat: {'OUI' if beats_detected[iband] else '-'}")
                
-        if sum(beat_detected):
+        if sum(beats_detected):
             curr_time = perf_counter()
             if curr_time - prev_beat > 60/180: # 180 BPM max
                 # reset the timer
                 prev_beat = curr_time
             else:
-                beat_detected = [0] * N_BANDS
+                beats_detected = beats_empty
         
 
         
         # Affichage console : une ligne de 32 caractères représentant les beats
-        visual = ''.join(['#' if i in filtered_indices and beat_detected[i] else '-' for i in range(N_BANDS)])
+        visual = ''.join(['#' if i in filtered_indices and beats_detected[i] else '-' for i in range(N_BANDS)])
         print(visual)
-        mylcd.lcd_display_string(visual[:16])
         if args.debug:
             print('-' * 80)
-            mylcd.lcd_clear()
             
         
 
