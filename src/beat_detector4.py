@@ -19,7 +19,7 @@ args = parser.parse_args()
 CHUNK = 1024
 RATE = 96000
 DEVICE_NAME = "ADCWM8782"
-CHANNELS = 1
+CHANNELS = 2
 N_BANDS = 64
 ENERGY_HISTORY = 42
 
@@ -37,7 +37,7 @@ device_index = find_input_device(DEVICE_NAME)
 if device_index is None:
     raise RuntimeError("Périphérique d'entrée non trouvé.")
 
-stream = p.open(format=pyaudio.paInt16,
+stream = p.open(format=pyaudio.paInt32,
                 channels=CHANNELS,
                 rate=RATE,
                 input=True,
