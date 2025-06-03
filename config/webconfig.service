@@ -1,0 +1,19 @@
+[Unit]
+Description="Web config for pharma"
+Wants=network-online.target
+After=network-online.target
+
+
+[Service]
+Type=simple
+GuessMainPID=yes
+ExecStart=/usr/bin/python webctrl.py
+ExecStop=kill -SIGINT $mainpid
+Restart=on-failure
+WorkingDirectory=/opt/services/pharma
+
+[Install]
+Alias=PharmaWebConfig
+WantedBy=multi-user.target
+
+

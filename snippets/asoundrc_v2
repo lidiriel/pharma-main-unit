@@ -1,0 +1,83 @@
+# lecture sur dup_record et redirection sur aplay
+# lecture possible dpuis python
+# arecord -D dup_record_plug -f S32_LE -c2 -r96000 | aplay
+# 
+# Entrée stéréo depuis ADCWM8782 (I2S)
+pcm.inputcap {
+    type hw
+    card 2
+    device 0
+    channels 2
+}
+
+# Reformater le flux stéréo en 4 canaux : G/D → G/D + G/D
+pcm.stereo_to_quad {
+    type route
+    slave.pcm "loopback_and_input"
+    slave.channels 4
+    ttable.0.0 1   # L vers L1
+    ttable.1.1 1   # R vers R1
+    ttable.0.2 1   # L vers L2
+    ttable.1.3 1   # R vers R2
+}
+
+pcm.loopback_and_input {
+    type multi
+    slaves.a.pcm "inputcap"
+    slaves.a.channels 2
+    slaves.b.pcm "loopback_input"
+    slaves.b.channels 2
+    bindings.0.slave a
+    bindings.0.channel 0
+    bindings.1.slave a
+    bindings.1.channel 1
+    bindings.2.slave b
+    bindings.2.channel 0
+    bindings.3.slave b
+    bindings.3.channel 1
+}
+
+# Sortie vers Loopback (2 canaux)
+pcm.loopback_out {
+    type hw
+    card Loopback
+    device 0
+    subdevice 0
+}
+
+# Multi PCM : Duplique les 2 canaux d’entrée vers loopback et vers la sortie par défaut
+pcm.dup_record {
+    type multi
+
+    slaves.a.pcm inputcap
+    slaves.a.channels 2
+
+    slaves.b.pcm loopback_out
+    slaves.b.channels 2
+
+    bindings.0.slave a
+    bindings.0.channel 0
+    bindings.1.slave a
+    bindings.1.channel 1
+
+    bindings.2.slave b
+    bindings.2.channel 0
+    bindings.3.slave b
+    bindings.3.channel 1
+}
+
+# Plug pour assurer la compatibilité ALSA
+pcm.dup_record_plug {
+    type plug
+    slave.pcm dup_record
+}
+
+# Pour lire le flux Loopback (en Python ou aplay)
+pcm.loopcap_input {
+    type hw
+    card Loopback
+    device 1
+    subdevice 0
+}
+
+

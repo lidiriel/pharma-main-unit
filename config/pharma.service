@@ -1,0 +1,20 @@
+[Unit]
+Description=Pharmacie
+After=network.target
+
+[Service]
+Type=simple
+User=compost
+GuessMainPID=yes
+ExecStart=/bin/bash -c 'source /home/compost/pharma/bin/activate && python master.py'
+ExecStop=kill -SIGINT $mainpid
+Restart=on-failure
+WorkingDirectory=/home/compost/pharma-main-unit/src/
+# affichage des log en temps reel dans journactl
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+Alias=Pharmacie
+WantedBy=multi-user.target
+
+
