@@ -1,5 +1,5 @@
 [Unit]
-Description=Pharmacie
+Description="master process for pharma"
 After=network.target
 
 [Service]
@@ -14,7 +14,6 @@ WorkingDirectory=/home/compost/pharma-main-unit/src/
 Environment=PYTHONUNBUFFERED=1
 
 [Install]
-Alias=Pharmacie
 WantedBy=multi-user.target
 
 

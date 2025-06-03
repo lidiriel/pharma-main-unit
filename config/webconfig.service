@@ -1,7 +1,7 @@
 [Unit]
 Description="Web config for pharma"
 Wants=network.target
-After=network.target
+After=syslog.target network.target
 
 
 [Service]
@@ -15,7 +15,6 @@ WorkingDirectory=/home/compost/pharma-main-unit/src/
 Environment=PYTHONUNBUFFERED=1
 
 [Install]
-Alias=PharmaWebConfig
 WantedBy=multi-user.target
 
 

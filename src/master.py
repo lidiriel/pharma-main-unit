@@ -39,9 +39,11 @@ if __name__ == "__main__":
    
     bd = BeatDetector.BeatDetector(config, queue)
     bd.start()
+    logger.debug('beatDetector started')
 
     cp = CommunicationProcessor.CommunicationProcessor(config, queue)
     cp.start()
+    logger.debug('CommunicationProcessor started')
     
     #wc = WebControl 
    
