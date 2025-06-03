@@ -1,16 +1,18 @@
 [Unit]
 Description="Web config for pharma"
-Wants=network-online.target
-After=network-online.target
+Wants=network.target
+After=network.target
 
 
 [Service]
 Type=simple
 GuessMainPID=yes
-ExecStart=/usr/bin/python webctrl.py
+ExecStart=/bin/bash -c 'python webctrl.py'
 ExecStop=kill -SIGINT $mainpid
 Restart=on-failure
-WorkingDirectory=/opt/services/pharma
+WorkingDirectory=/home/compost/pharma-main-unit/src/
+# affichage des log en temps reel dans journactl
+Environment=PYTHONUNBUFFERED=1
 
 [Install]
 Alias=PharmaWebConfig
