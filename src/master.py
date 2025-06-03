@@ -27,6 +27,11 @@ if __name__ == "__main__":
     
     Pins.pinsInit()
     
+    """ queue use tuple (CMD, VALUE)
+        CMD are : 
+            BEAT new beat with timestamp
+            CHG_SEQ change sequence with sequence name        
+    """
     queue = queue.Queue()
         
     #ip = InterfaceProcessor.InterfaceProcessor(config)

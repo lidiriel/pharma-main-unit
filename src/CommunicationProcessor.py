@@ -7,6 +7,7 @@ import time
 import logging
 import json
 from collections import deque
+import random
 
 
 ERROR_PIN = 29
@@ -51,13 +52,28 @@ class CommunicationProcessor(threading.Thread):
         sequence = deque(data[seq_name])
 
         while True:
-            tvalue = self.queue.get(block=True)
+            (cmd, value) = self.queue.get(block=True)
             try:
-                #Pins.pinsWrite('ERROR', False)
-                sequence.rotate(-1) # rotate left
-                code = int(sequence[0],0) # first element
-                self.logger.debug(f"send code {code}")
-                response = client.write_register(REGISTER_LED, code, unit=0)
+                if cmd == "BEAT":
+                    #Pins.pinsWrite('ERROR', False)
+                    sequence.rotate(-1) # rotate left
+                    element = sequence[0]
+                    code = 0
+                    if element == "RAND":
+                        code = random.randint(0,255)
+                        # duplicate code for two cross
+                        code = (code << 8) | code
+                    else:
+                        code = int(element,0) # first element
+                    self.logger.debug(f"send code {code}")
+                    response = client.write_register(REGISTER_LED, code, unit=0)
+                elif cmd == "CHG_SEQ":
+                    try:
+                        self.logger.debug(f"Change sequence to {value}")
+                        sequence = deque(data[value])
+                    except KeyError as e:
+                        self.logger.error(f"ERROR invalid sequence name {value}")
+                        sequence = deque(["RAND"])
             except Exception as e:
                 #Pins.pinsWrite('ERROR', True)
                 Pins.pinsWrite('ERROR', True)

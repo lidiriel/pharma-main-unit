@@ -124,7 +124,7 @@ class BeatDetector(threading.Thread):
                 curr_time = perf_counter()
                 if curr_time - prev_beat > 60/180: # 180 BPM max
                     prev_beat = curr_time
-                    self.queue.append(curr_time)
+                    self.queue.append(("BEAT",curr_time))
             
             
             
