@@ -21,13 +21,14 @@ class BeatDetector(threading.Thread):
         self.queue = queue
         self.pa = pyaudio.PyAudio()
         self.logger = logging.getLogger('BeatDetector')
+        self.logger.setLevel(logging.DEBUG)
     
     
     def find_input_device(self, name="Loopback"):
-        print(f"search for device {name}")
+        self.logger.info(f"search for device {name}")
         for i in range(self.pa.get_device_count()):
             info = self.pa.get_device_info_by_index(i)
-            print(f"device {i} info {info['name']}")
+            self.logger.debug(f"device {i} info {info['name']}")
             if name.lower() in info['name'].lower() and info['maxInputChannels'] > 0:
                 return i
         return None
@@ -52,7 +53,6 @@ class BeatDetector(threading.Thread):
         return bands
         
     def run(self):
-        
         
         device_index = self.find_input_device(name=self.config.beat_device_name)
         if device_index is None:
@@ -104,7 +104,7 @@ class BeatDetector(threading.Thread):
             # Mean of channels
             mono_samples = np.mean(samples, axis=1)
             spectrum = np.abs(np.fft.rfft(mono_samples, n=CHUNK))
-            #cfactor = []
+
             for iband in filtered_indices:
                 start, end = bands[iband]
                 band_weight = ((end - start) + 1) / CHUNK
@@ -119,12 +119,12 @@ class BeatDetector(threading.Thread):
                 var = np.var(energy_history[iband])
                 ratio = energy / mean
                 beats_detected[iband] = (1 if ratio > self.beat_c_factor  else 0)
-                self.logger.debug(f"Bande {iband:02d} | Energie: {energy_history[iband][-1]:.2e} | Moyenne: {mean:.2e} | Ratio {ratio:.2e} | Variance: {var:.2e} | Beat: {'OUI' if beats_detected[iband] else '-'}")
+                self.logger.debug(f"Bande {iband:02d} | Energie: {energy_history[iband][-1]:.2e} | Moyenne: {mean:.2e} | Ratio {ratio:.2e} | Variance: {var:.2e} | Beat: {'#' if beats_detected[iband] else '-'}")
             if sum(beats_detected):
                 curr_time = perf_counter()
                 if curr_time - prev_beat > 60/180: # 180 BPM max
                     prev_beat = curr_time
-                    self.queue.append(("BEAT",curr_time))
+                    self.queue.put(("BEAT",curr_time))
             
             
             

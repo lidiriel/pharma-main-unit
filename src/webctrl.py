@@ -105,4 +105,5 @@ if __name__ == '__main__':
     }
 
     webapp = Programmation()
+    cherrypy.server.socket_host = '0.0.0.0'
     cherrypy.quickstart(webapp, '/', conf)

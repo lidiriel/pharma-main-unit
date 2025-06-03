@@ -40,16 +40,16 @@ class CommunicationProcessor(threading.Thread):
         try:
             with open(self.config.patterns_file) as f:
                 data = json.load(f)
-                print("Contenu JSON :", data)
+                self.logger.info(f"JSON patterns file content : {data}")
         except FileNotFoundError:
-            self.logger.error("Erreur : Le fichier n'a pas été trouvé.")
+            self.logger.error(f"Error: File not found {self.config.patterns_file}")
         except json.JSONDecodeError:
-            self.logger.error("Erreur : Le contenu du fichier n'est pas un JSON valide.")
+            self.logger.error(f"Error Invalid JSON content {self.config.patterns_file}")
         except Exception as e:
-            self.logger.error(f"Erreur inattendue : {e}")
+            self.logger.error(f"Unexpected error : {e}")
             
-        seq_name = "sequence1"
-        sequence = deque(data[seq_name])
+        # default sequence if not loaded at startup
+        sequence = deque(["RAND"])
 
         while True:
             (cmd, value) = self.queue.get(block=True)
@@ -69,8 +69,9 @@ class CommunicationProcessor(threading.Thread):
                     response = client.write_register(REGISTER_LED, code, unit=0)
                 elif cmd == "CHG_SEQ":
                     try:
-                        self.logger.debug(f"Change sequence to {value}")
+                        self.logger.info(f"Change sequence to {value}")
                         sequence = deque(data[value])
+                        self.logger.debug(f"Sequence is now : {sequence}")
                     except KeyError as e:
                         self.logger.error(f"ERROR invalid sequence name {value}")
                         sequence = deque(["RAND"])

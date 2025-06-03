@@ -1,3 +1,6 @@
 # install webservice
 sudo cp webconfig.service /lib/systemd/system/
 sudo systemctl start webconfig.service 
+# configure service to start automatically
+sudo systemctl enable webconfig.service
+

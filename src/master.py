@@ -33,17 +33,19 @@ if __name__ == "__main__":
             CHG_SEQ change sequence with sequence name        
     """
     queue = queue.Queue()
+
+    queue.put(("CHG_SEQ","sequence1"))
         
     #ip = InterfaceProcessor.InterfaceProcessor(config)
     #ip.start()
+    #logger.info('InterfaceProcessor started')
    
     bd = BeatDetector.BeatDetector(config, queue)
     bd.start()
-    logger.debug('beatDetector started')
+    logger.info('beatDetector started')
 
     cp = CommunicationProcessor.CommunicationProcessor(config, queue)
     cp.start()
-    logger.debug('CommunicationProcessor started')
+    logger.info('CommunicationProcessor started')
     
-    #wc = WebControl 
    
