@@ -1,0 +1,3 @@
+# install webservice
+sudo cp webconfig.service /lib/systemd/system/
+sudo systemctl start webconfig.service 
