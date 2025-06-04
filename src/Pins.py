@@ -1,11 +1,10 @@
 import wiringpi
 
-
+""" GPIO 4 reserved for shutdown
+"""
 PINS = {
-    'DE': 0,
-    'ERROR': 29,
-    'MSG': 28,
-    'PRG':28
+    'RS485_DE': 17,
+    'HEART': 12,
 }
 
 

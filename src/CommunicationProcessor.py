@@ -1,5 +1,4 @@
 import threading
-import datetime
 from pymodbus.client.sync import ModbusSerialClient
 import Pins
 import RPiRS485
@@ -8,11 +7,10 @@ import logging
 import json
 from collections import deque
 import random
+from Pins import PINS
 
 
-ERROR_PIN = 29
 REGISTER_LED = 0
-RS485_DE_PIN = 17
 
 class CommunicationProcessor(threading.Thread):
     def __init__(self, config, queue):
@@ -30,7 +28,7 @@ class CommunicationProcessor(threading.Thread):
                                  baudrate=self.config.com_serial_baudrate, 
                                  stopbits=1,
                                  timeout=1,
-                                 de_pin=RS485_DE_PIN)
+                                 de_pin=PINS['RS485_DE'])
 
     def run(self):
         client = ModbusSerialClient(method='rtu')
@@ -55,7 +53,6 @@ class CommunicationProcessor(threading.Thread):
             (cmd, value) = self.queue.get(block=True)
             try:
                 if cmd == "BEAT":
-                    #Pins.pinsWrite('ERROR', False)
                     sequence.rotate(-1) # rotate left
                     element = sequence[0]
                     code = 0
@@ -77,7 +74,6 @@ class CommunicationProcessor(threading.Thread):
                         sequence = deque(["RAND"])
             except Exception as e:
                 #Pins.pinsWrite('ERROR', True)
-                Pins.pinsWrite('ERROR', True)
                 self.logger.error("ERROR when processing patern")
                 if client.socket is None:
                     self.logger.error("renew socket")
