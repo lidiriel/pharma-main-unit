@@ -18,18 +18,18 @@ class InterfaceProcessor(threading.Thread):
         # Create PWM object on GPIO12 with frequency 1 Hz
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(PINS['HEART'], GPIO.OUT)
-        self.pwm = GPIO.PWM(PINS['HEART'], 1)
+        self.pwm = GPIO.PWM(PINS['HEART'], 0.5)
+        self.lcd_status = False
         try:
             self.lcd = I2C_LCD_driver.lcd()
-            self.lcd.status = True
+            self.lcd_status = True
         except Exception as e:
             self.logger.error(f"LCD error {e}")
-            self.lcd.status = False
         self.seq_name = "sequence1"
         self.queue.put(("CHG_SEQ",self.seq_name))
     
     def get_ip_address(self):
-        """ if connected to network : dynmic ip
+        """ if connected to network : dyanmic ip
         """
         try:
             # Connexion fictive à une IP publique pour obtenir l'IP locale utilisée
@@ -37,6 +37,7 @@ class InterfaceProcessor(threading.Thread):
             s.connect(("8.8.8.8", 80))
             ip = s.getsockname()[0]
             s.close()
+            self.logger.info(f"my ip is {ip}")
             return ip
         except Exception as e:
             self.logger.error(f"ERROR to get ip : {e}")
@@ -46,14 +47,17 @@ class InterfaceProcessor(threading.Thread):
         """
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            return socket.inet_ntoa(
+            ip = socket.inet_ntoa(
                 fcntl.ioctl(
                     s.fileno(),
                     0x8915,  # SIOCGIFADDR
                     struct.pack('256s', ifname[:15].encode('utf-8'))
                 )[20:24]
             )
-        except OSError:
+            self.logger.info(f"my ip is {ip}")
+            return ip
+        except Exception as e:
+            self.logger.error(f"ERROR to get ip : {e}")
             return None
     
     
@@ -65,7 +69,7 @@ class InterfaceProcessor(threading.Thread):
             self.logger.error(f"ERROR to start pwm heart led : {e}")
              
         while True:
-            if self.lcd.status:
+            if self.lcd_status:
                 self.lcd.lcd_clear()
                 self.lcd.lcd_display_string(u"Compost Collaps", 1)
                 time.sleep(3)

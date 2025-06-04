@@ -41,8 +41,8 @@ if __name__ == "__main__":
     bd.start()
     logger.info('beatDetector started')
 
-    cp = CommunicationProcessor.CommunicationProcessor(config, queue)
-    cp.start()
-    logger.info('CommunicationProcessor started')
+    #cp = CommunicationProcessor.CommunicationProcessor(config, queue)
+    #cp.start()
+    #logger.info('CommunicationProcessor started')
     
    

@@ -125,6 +125,8 @@ class BeatDetector(threading.Thread):
                 if curr_time - prev_beat > 60/180: # 180 BPM max
                     prev_beat = curr_time
                     self.queue.put(("BEAT",curr_time))
+                    visual = ''.join(['#' if beats_detected[i] else '-' for i in range(N_BANDS)])
+                    self.logger.debug(visual)
             
             
             
