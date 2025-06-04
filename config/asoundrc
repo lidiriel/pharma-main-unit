@@ -1,0 +1,31 @@
+#
+# Alsamixer for compostcollaps ADC source.
+# Soft volume is set to level 15
+#
+#This section makes a reference to your I2S hardware, adjust the card name
+# to what is shown in arecord -l after card x: before the name in []
+#You may have to adjust channel count also but stick with default first
+pcm.adc_hw {
+	type hw
+	card ADCWM8782
+	channels 2
+	format S32_LE
+}
+
+#This is the software volume control, it links to the hardware above and after
+# saving the .asoundrc file you can type alsamixer, press F6 to select
+# your I2S mic then F4 to set the recording volume and arrow up and down
+# to adjust the volume
+# After adjusting the volume - go for 50 percent at first, you can do
+# something like 
+# arecord -D dmic_sv -c2 -r 48000 -f S32_LE -t wav -V mono -v myfile.wav
+pcm.adc_sv {
+	type softvol
+	slave.pcm adc_hw
+	control {
+		name "ADC Capture Volume"
+		card ADCWM8782
+	}
+	min_dB -10.0
+	max_dB 30.0
+}
