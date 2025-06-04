@@ -15,8 +15,9 @@ class InterfaceProcessor(threading.Thread):
         self.config = config
         self.queue = queue
         self.logger = logging.getLogger('InterfaceProcessor')
-        # Crée un objet PWM sur GPIO12 à 1 Hz
-        self.pwm = GPIO.PWM(PINS['HEART'], 1)  # 1 Hz = 1 clignotement par seconde
+        # Create PWM object on GPIO12 with frequency 1 Hz
+        GPIO.setmode(GPIO.BCM)
+        self.pwm = GPIO.PWM(PINS['HEART'], 1)
         self.lcd = I2C_LCD_driver.lcd()
         self.seq_name = "sequence1"
         self.queue.put(("CHG_SEQ",self.seq_name))
