@@ -17,6 +17,7 @@ class InterfaceProcessor(threading.Thread):
         self.logger = logging.getLogger('InterfaceProcessor')
         # Create PWM object on GPIO12 with frequency 1 Hz
         GPIO.setmode(GPIO.BCM)
+        GPIO.setup(PINS['HEART'], GPIO.OUT)
         self.pwm = GPIO.PWM(PINS['HEART'], 1)
         self.lcd = I2C_LCD_driver.lcd()
         self.seq_name = "sequence1"
