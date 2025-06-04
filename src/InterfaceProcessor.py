@@ -19,7 +19,12 @@ class InterfaceProcessor(threading.Thread):
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(PINS['HEART'], GPIO.OUT)
         self.pwm = GPIO.PWM(PINS['HEART'], 1)
-        self.lcd = I2C_LCD_driver.lcd()
+        try:
+            self.lcd = I2C_LCD_driver.lcd()
+            self.lcd.status = True
+        except Exception as e:
+            self.logger.error(f"LCD error {e}")
+            self.lcd.status = False
         self.seq_name = "sequence1"
         self.queue.put(("CHG_SEQ",self.seq_name))
     
@@ -60,13 +65,14 @@ class InterfaceProcessor(threading.Thread):
             self.logger.error(f"ERROR to start pwm heart led : {e}")
              
         while True:
-            self.lcd.lcd_clear()
-            self.lcd.lcd_display_string(u"Compost Collaps")
-            time.sleep(2)
-            self.lcd.lcd_clear()
-            self.lcd.lcd_display_string(f"IP {self.myip}", 1)
-            self.lcd.lcd_display_string(f"PLAY {self.seq_name}", 2)
-            time.sleep(2)
+            if self.lcd.status:
+                self.lcd.lcd_clear()
+                self.lcd.lcd_display_string(u"Compost Collaps", 1)
+                time.sleep(3)
+                self.lcd.lcd_clear()
+                self.lcd.lcd_display_string(f"IP {self.myip}", 1)
+                self.lcd.lcd_display_string(f"PLAY {self.seq_name}", 2)
+            time.sleep(3)
             
             
     
