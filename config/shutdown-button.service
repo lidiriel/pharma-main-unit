@@ -1,0 +1,13 @@
+[Unit]
+Description="Shutdown on GPIO button press"
+After=multi-user.target
+
+[Service]
+ExecStart=/usr/bin/python3 shutdown_button.py
+Restart=always
+User=root
+WorkingDirectory=/home/compost/pharma-main-unit/src/
+
+[Install]
+WantedBy=multi-user.target
+

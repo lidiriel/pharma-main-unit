@@ -7,3 +7,7 @@ sudo cp pharma.service /lib/systemd/system/
 sudo systemctl start pharma.service 
 
 # install shutdown service
+sudo systemctl daemon-reexec
+sudo systemctl daemon-reload
+sudo systemctl enable shutdown-button.service
+sudo systemctl start shutdown-button.service
