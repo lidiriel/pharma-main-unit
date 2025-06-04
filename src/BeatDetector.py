@@ -21,7 +21,9 @@ class BeatDetector(threading.Thread):
         self.queue = queue
         self.pa = pyaudio.PyAudio()
         self.logger = logging.getLogger('BeatDetector')
-        self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.INFO)
+        self.beatslogger = logging.getLogger('beats')
+        self.beatslogger.setLevel(logging.DEBUG)
     
     
     def find_input_device(self, name="Loopback"):
@@ -118,15 +120,15 @@ class BeatDetector(threading.Thread):
                 mean = np.mean(energy_history[iband])
                 var = np.var(energy_history[iband])
                 ratio = energy / mean
-                beats_detected[iband] = (1 if ratio > self.beat_c_factor  else 0)
-                self.logger.debug(f"Bande {iband:02d} | Energie: {energy_history[iband][-1]:.2e} | Moyenne: {mean:.2e} | Ratio {ratio:.2e} | Variance: {var:.2e} | Beat: {'#' if beats_detected[iband] else '-'}")
+                beats_detected[iband] = (1 if ratio > self.config.beat_c_factor  else 0)
+                self.beatslogger.debug(f"Bande {iband:02d} | Energie: {energy_history[iband][-1]:.2e} | Moyenne: {mean:.2e} | Ratio {ratio:.2e} | Variance: {var:.2e} | Beat: {'#' if beats_detected[iband] else '-'}")
             if sum(beats_detected):
                 curr_time = perf_counter()
                 if curr_time - prev_beat > 60/180: # 180 BPM max
                     prev_beat = curr_time
                     self.queue.put(("BEAT",curr_time))
                     visual = ''.join(['#' if beats_detected[i] else '-' for i in range(N_BANDS)])
-                    self.logger.debug(visual)
+                    self.beatslogger.info(visual)
             
             
             

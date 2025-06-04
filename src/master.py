@@ -16,13 +16,18 @@ if __name__ == "__main__":
     logger.setLevel(logging.INFO)
     fh = RotatingFileHandler(config.logFile, maxBytes=102400, backupCount=2)
     fh.setLevel(logging.INFO)
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.ERROR)
+    #ch = logging.StreamHandler()
+    #ch.setLevel(logging.ERROR)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     fh.setFormatter(formatter)
-    ch.setFormatter(formatter)
+    #ch.setFormatter(formatter)
     logger.addHandler(fh)
-    logger.addHandler(ch)
+    #logger.addHandler(ch)
+    
+    beatlogger = logging.getLogger("beats")
+    beatlogger.setLevel(logging.INFO)
+    bfh = RotatingFileHandler(config.beatlogFile, maxBytes=102400, backupCount=1)
+    beatlogger.addhandler(bfh)
     
     Pins.pinsInit()
     

@@ -2,6 +2,7 @@
 class Config(object):
     def __init__(self):
         self.logFile = '/tmp/pharma.log'
+        self.beatslogFile = '/tmp/pharma_beats.log'
         self.patterns_file = '/home/compost/pharma-main-unit/config/cross.json'
         self.beat_device_name = 'adc_sv'
         self.beat_min_freq = 0
