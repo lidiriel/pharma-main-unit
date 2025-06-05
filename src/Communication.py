@@ -15,7 +15,7 @@ class Communication(threading.Thread):
         self.config = config
         self.queue = queue
         self.logger = logging.getLogger('Communication')
-        if self.config.com_modbus_debug:
+        if self.config.com_debug:
             self.logger.setLevel(logging.DEBUG)
         else:
             self.logger.setLevel(logging.ERROR)

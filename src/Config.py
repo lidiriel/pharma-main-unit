@@ -7,10 +7,10 @@ class Config(object):
         self.beat_device_name = 'adc_sv'
         self.beat_min_freq = 50
         self.beat_max_freq = 4000
-        self.beat_min_energy = 1e15
+        self.beat_min_energy = 1e17
         self.beat_c_factor = 5
-        self.beat_interval = 0.66
+        self.beat_interval = 0.33
         self.beat_debug = False
-        self.com_modbus_debug = True
+        self.com_debug = False
         self.com_serial_port = '/dev/ttyAMA0'
-        self.com_serial_baudrate = 9600
+        self.com_serial_baudrate = 57600
