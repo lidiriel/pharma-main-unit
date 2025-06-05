@@ -7,7 +7,7 @@ from collections import deque
 from time import perf_counter
 import numpy as np
 
-CHUNK = 1024
+CHUNK = 2048
 RATE = 96000
 SAMPLE_FORMAT = pyaudio.paInt32
 CHANNELS = 2
@@ -21,9 +21,9 @@ class BeatDetector(threading.Thread):
         self.queue = queue
         self.pa = pyaudio.PyAudio()
         self.logger = logging.getLogger('BeatDetector')
-        self.logger.setLevel(logging.INFO)
-        self.beatslogger = logging.getLogger('beats')
-        self.beatslogger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.DEBUG)
+        #self.beatslogger = logging.getLogger('beats')
+        #self.beatslogger.setLevel(logging.DEBUG)
     
     
     def find_input_device(self, name="Loopback"):
@@ -98,6 +98,7 @@ class BeatDetector(threading.Thread):
 
         prev_beat = perf_counter()
         beats_empty = [0]*N_BANDS
+        clk_id = time.CLOCK_REALTIME
         while True:
             beats_detected = beats_empty
             data = stream.read(CHUNK, exception_on_overflow=False)
@@ -111,25 +112,34 @@ class BeatDetector(threading.Thread):
                 start, end = bands[iband]
                 band_weight = ((end - start) + 1) / CHUNK
                 energy = band_weight * np.sum(spectrum[start:end] ** 2)
+                energy_history[iband].append(energy)
                 if energy < self.config.beat_min_energy:
-                    energy_history[iband].append(energy)
                     beats_detected[iband] = 0
                     continue
-                energy_history[iband].append(energy)
     
                 mean = np.mean(energy_history[iband])
                 var = np.var(energy_history[iband])
+                std = np.std(energy_history[iband])
                 ratio = energy / mean
                 beats_detected[iband] = (1 if ratio > self.config.beat_c_factor  else 0)
-                self.beatslogger.debug(f"Bande {iband:02d} | Energie: {energy_history[iband][-1]:.2e} | Moyenne: {mean:.2e} | Ratio {ratio:.2e} | Variance: {var:.2e} | Beat: {'#' if beats_detected[iband] else '-'}")
-            if sum(beats_detected):
-                curr_time = perf_counter()
-                if curr_time - prev_beat > 60/180: # 180 BPM max
+                if self.config.beat_debug:
+                    #print(energy_history[iband])
+                    #print(f"Bande {iband:02d} | Energie: {energy_history[iband][-1]:.2e} | Moyenne: {mean:.2e} | Ratio {ratio:.2e} | Std: {std:.2e} | Var: {var:.2e} | Beat: {'#' if beats_detected[iband] else '-'}")
+                    pass       
+            if sum(beats_detected) >= 1:
+                curr_time = time.clock_gettime(clk_id)
+                if (curr_time - prev_beat) > self.config.beat_interval:
+                    # < 180 BPM max
                     prev_beat = curr_time
                     self.queue.put(("BEAT",curr_time))
-                    visual = ''.join(['#' if beats_detected[i] else '-' for i in range(N_BANDS)])
-                    self.beatslogger.info(visual)
-            
+                else:
+                    # > 180 BPM
+                    beats_detected = beats_empty
+                                                                                
+            if self.config.beat_debug:
+                visual = ''.join(['#' if beats_detected[i] else '-' for i in range(N_BANDS)])
+                print(visual)
+            #time.sleep(0.03)
             
             
             

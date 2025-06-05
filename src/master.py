@@ -24,10 +24,10 @@ if __name__ == "__main__":
     logger.addHandler(fh)
     logger.addHandler(ch)
     
-    beatlogger = logging.getLogger("beats")
-    beatlogger.setLevel(logging.INFO)
-    bfh = RotatingFileHandler(config.beatslogFile, maxBytes=102400, backupCount=1)
-    beatlogger.addHandler(bfh)
+    #beatlogger = logging.getLogger("beats")
+    #beatlogger.setLevel(logging.INFO)
+    #bfh = RotatingFileHandler(config.beatslogFile, maxBytes=102400, backupCount=1)
+    #beatlogger.addHandler(bfh)
     
     Pins.pinsInit()
     
