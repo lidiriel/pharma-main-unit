@@ -10,15 +10,14 @@ import minimalmodbus
 
 REGISTER_LED = 0
 
-class CommunicationProcessor(threading.Thread):
+class CommunicationProcessorMinimal(threading.Thread):
     def __init__(self, config, queue):
         super().__init__()
         self.config = config
         self.queue = queue
         if self.config.com_modbus_debug:
-            logging.getLogger('CommunicationProcessorMinimal').setLevel(logging.DEBUG)
-        else:
-            logging.getLogger('CommunicationProcessorMinimal').setLevel(logging.ERROR)
+            self.logger = logging.getLogger('CommunicationProcessorMinimal').setLevel(logging.DEBUG)
+        self.logger = logging.getLogger('CommunicationProcessorMinimal').setLevel(logging.ERROR)
 
         self.instrument = minimalmodbus.Instrument(port='/dev/ttyAMA0', slaveaddress=0)
         self.instrument.serial.baudrate = config.com_serial_baudrate
