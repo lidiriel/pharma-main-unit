@@ -20,7 +20,7 @@ if __name__ == "__main__":
     import time
 
     instrument = minimalmodbus.Instrument(port='/dev/ttyAMA0', slaveaddress=0)
-    instrument.serial.baudrate = 57600
+    instrument.serial.baudrate = 76800
     instrument.serial.bytesize = 8
     instrument.serial.parity = minimalmodbus.serial.PARITY_NONE
     instrument.serial.stopbits = 1
@@ -29,7 +29,7 @@ if __name__ == "__main__":
     instrument.clear_buffers_before_each_transaction = True
 
     try:
-        for data in [0x0001, 0x0002, 0x0004, 0x0008, 0x0010, 0x0020, 0x0040, 0x0080, 0x0000]:
+        for data in [0x0101, 0x0202, 0x0404, 0x0808, 0x1010, 0x2020, 0x4040, 0x8080, 0x0000]:
             print(f"send {data:04x}")
             instrument.write_register(0, data)
             time.sleep(2);

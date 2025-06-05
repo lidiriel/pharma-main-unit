@@ -181,8 +181,11 @@ class BeatDetector(threading.Thread):
                 curr_time = time.clock_gettime(self.clk_id)
                 if (curr_time - prev_beat) > self.config.beat_interval:
                     # < 180 BPM max
+                    start =  time.perf_counter()
                     self.send_pattern(tick = curr_time)
+                    end =  time.perf_counter()
                     prev_beat = curr_time
+                    self.logger.info(f"delta send pattern {end - start :.6f}")
                     #self.queue.put(("BEAT",curr_time))
                 else:
                     # > 180 BPM
