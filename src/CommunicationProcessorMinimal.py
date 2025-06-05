@@ -1,14 +1,12 @@
 import threading
-from pymodbus.client.sync import ModbusSerialClient
 import Pins
-import RPiRS485
 import time
 import logging
 import json
 from collections import deque
 import random
 from Pins import PINS
-
+import minimalmodbus
 
 REGISTER_LED = 0
 
@@ -18,22 +16,20 @@ class CommunicationProcessor(threading.Thread):
         self.config = config
         self.queue = queue
         if self.config.com_modbus_debug:
-            logging.getLogger('pymodbus').setLevel(logging.DEBUG)
+            logging.getLogger('CommunicationProcessorMinimal').setLevel(logging.DEBUG)
         else:
-            logging.getLogger('pymodbus').setLevel(logging.ERROR)
-        self.logger = logging.getLogger('CommunicationProcessor')
+            logging.getLogger('CommunicationProcessorMinimal').setLevel(logging.ERROR)
 
-    def __getSerial(self):
-        return RPiRS485.RPiRS485(port=self.config.com_serial_port, 
-                                 baudrate=self.config.com_serial_baudrate, 
-                                 stopbits=1,
-                                 timeout=0,
-                                 de_pin=PINS['RS485_DE'])
+        self.instrument = minimalmodbus.Instrument(port='/dev/ttyAMA0', slaveaddress=0)
+        self.instrument.serial.baudrate = config.com_serial_baudrate
+        self.instrument.serial.bytesize = 8
+        self.instrument.serial.parity = minimalmodbus.serial.PARITY_NONE
+        self.instrument.serial.stopbits = 1
+        self.instrument.serial.timeout = 0
+        self.instrument.mode = minimalmodbus.MODE_RTU
+        self.instrument.clear_buffers_before_each_transaction = True
 
     def run(self):
-        client = ModbusSerialClient(method='rtu')
-        client.socket = self.__getSerial()
-        client.connect()
         data = None
         try:
             with open(self.config.patterns_file) as f:
@@ -62,8 +58,8 @@ class CommunicationProcessor(threading.Thread):
                         code = (code << 8) | code
                     else:
                         code = int(element,0) # first element
-                    self.logger.debug(f"send code {code}")
-                    response = client.write_register(REGISTER_LED, code, unit=0)
+                    self.instrument.write_register(REGISTER_LED, code)
+                    self.logger.debug(f"sended code {code:4x}")
                 elif cmd == "CHG_SEQ":
                     try:
                         self.logger.info(f"Change sequence to {value}")
@@ -73,10 +69,4 @@ class CommunicationProcessor(threading.Thread):
                         self.logger.error(f"ERROR invalid sequence name {value}")
                         sequence = deque(["RAND"])
             except Exception as e:
-                #Pins.pinsWrite('ERROR', True)
                 self.logger.error(f"ERROR when processing patern {e}")
-                if client.socket is None:
-                    self.logger.error("renew socket")
-                    client.socket = self.__getSerial()
-            finally:
-                time.sleep(1)
