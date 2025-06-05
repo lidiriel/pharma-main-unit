@@ -3,12 +3,11 @@ import logging
 import time
 import Pins
 import pyaudio
-from collections import deque
 from time import perf_counter
 import numpy as np
-import minimalmodbus
 import json
 import random
+from collections import deque
 
 """ I2S ADC parameters
     Algo parameters
@@ -31,18 +30,8 @@ class BeatDetector(threading.Thread):
         self.pa = pyaudio.PyAudio()
         self.logger = logging.getLogger('BeatDetector')
         self.logger.setLevel(logging.INFO)
-        
-        self.instrument = minimalmodbus.Instrument(port='/dev/ttyAMA0', slaveaddress=0)
-        self.instrument.serial.baudrate = config.com_serial_baudrate
-        self.instrument.serial.bytesize = 8
-        self.instrument.serial.parity = minimalmodbus.serial.PARITY_NONE
-        self.instrument.serial.stopbits = 1
-        self.instrument.serial.timeout = 0
-        self.instrument.mode = minimalmodbus.MODE_RTU
-        self.instrument.clear_buffers_before_each_transaction = True
-        
         self.clk_id = time.CLOCK_REALTIME
-    
+        
     
     def find_input_device(self, name="Loopback"):
         self.logger.info(f"search for device {name}")
@@ -71,23 +60,6 @@ class BeatDetector(threading.Thread):
     
         bands = [(bins[i], bins[i + 1]) for i in range(len(bins) - 1)]
         return bands
-    
-    def send_pattern(self, tick):
-        try:
-            element = self.sequence[self.sequence_idx]
-            code = 0
-            if element == "RAND":
-                code = random.randint(0,255)
-                # duplicate code for two cross
-                code = (code << 8) | code
-            else:
-                code = int(element,0)
-            self.instrument.write_register(REGISTER_LED, code)
-            my_time = time.clock_gettime(self.clk_id) - tick
-            self.logger.info(f"sended code {code:#04x} sending latency {my_time}")
-            self.sequence_idx = (self.sequence_idx + 1) % self.sequence_len
-        except Exception as e:
-            self.logger.error(f"Send pattern error {e}")
         
     def run(self):
         # READ sequence
@@ -102,11 +74,6 @@ class BeatDetector(threading.Thread):
             self.logger.error(f"Error Invalid JSON content {self.config.patterns_file}")
         except Exception as e:
             self.logger.error(f"Unexpected error : {e}")
-        
-        self.logger.info(f"Set sequence to {SEQ_NAME}")
-        self.sequence = data[SEQ_NAME]
-        self.sequence_idx = 0
-        self.sequence_len = len(self.sequence) 
         
         device_index = self.find_input_device(name=self.config.beat_device_name)
         if device_index is None:
@@ -181,12 +148,8 @@ class BeatDetector(threading.Thread):
                 curr_time = time.clock_gettime(self.clk_id)
                 if (curr_time - prev_beat) > self.config.beat_interval:
                     # < 180 BPM max
-                    start =  time.perf_counter()
-                    self.send_pattern(tick = curr_time)
-                    end =  time.perf_counter()
+                    self.queue.put(("BEAT",curr_time))
                     prev_beat = curr_time
-                    self.logger.info(f"delta send pattern {end - start :.6f}")
-                    #self.queue.put(("BEAT",curr_time))
                 else:
                     # > 180 BPM
                     beats_detected = beats_empty

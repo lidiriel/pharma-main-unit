@@ -2,7 +2,7 @@ import logging
 import queue
 import datetime
 import Config
-import CommunicationProcessorMinimal
+import Communication
 import InterfaceProcessor
 import BeatDetector
 import Pins
@@ -41,8 +41,8 @@ if __name__ == "__main__":
     bd.start()
     logger.info('beatDetector started')
 
-    #cp = CommunicationProcessorMinimal.CommunicationProcessorMinimal(config, queue)
-    #cp.start()
-    #logger.info('CommunicationProcessor started')
+    cp = Communication.Communication(config, queue)
+    cp.start()
+    logger.info('Communication started')
     
    
