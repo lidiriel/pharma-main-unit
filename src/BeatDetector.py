@@ -7,6 +7,9 @@ from collections import deque
 from time import perf_counter
 import numpy as np
 
+""" I2S ADC parameters
+    Algo parameters
+"""
 CHUNK = 2048
 RATE = 96000
 SAMPLE_FORMAT = pyaudio.paInt32
@@ -21,9 +24,7 @@ class BeatDetector(threading.Thread):
         self.queue = queue
         self.pa = pyaudio.PyAudio()
         self.logger = logging.getLogger('BeatDetector')
-        self.logger.setLevel(logging.DEBUG)
-        #self.beatslogger = logging.getLogger('beats')
-        #self.beatslogger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.INFO)
     
     
     def find_input_device(self, name="Loopback"):

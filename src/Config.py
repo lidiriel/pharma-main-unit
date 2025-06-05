@@ -10,7 +10,7 @@ class Config(object):
         self.beat_min_energy = 1e15
         self.beat_c_factor = 5
         self.beat_interval = 0.66
-        self.beat_debug = True
-        self.com_modbus_debug = False
+        self.beat_debug = False
+        self.com_modbus_debug = True
         self.com_serial_port = '/dev/ttyAMA0'
-        self.com_serial_baudrate = 38400
+        self.com_serial_baudrate = 57600

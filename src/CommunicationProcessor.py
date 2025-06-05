@@ -27,7 +27,7 @@ class CommunicationProcessor(threading.Thread):
         return RPiRS485.RPiRS485(port=self.config.com_serial_port, 
                                  baudrate=self.config.com_serial_baudrate, 
                                  stopbits=1,
-                                 timeout=1,
+                                 timeout=0,
                                  de_pin=PINS['RS485_DE'])
 
     def run(self):
@@ -74,7 +74,7 @@ class CommunicationProcessor(threading.Thread):
                         sequence = deque(["RAND"])
             except Exception as e:
                 #Pins.pinsWrite('ERROR', True)
-                self.logger.error("ERROR when processing patern")
+                self.logger.error(f"ERROR when processing patern {e}")
                 if client.socket is None:
                     self.logger.error("renew socket")
                     client.socket = self.__getSerial()

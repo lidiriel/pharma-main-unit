@@ -3,12 +3,6 @@ import asyncio
 from datetime import datetime
 import random
 
-# import pymodbus.client as ModbusClient
-# from pymodbus import (
-#     FramerType,
-#     ModbusException,
-#     pymodbus_apply_logging_config,
-# )
 
 """
 baudrate
@@ -20,94 +14,25 @@ baudrate
 115200
 """
 
-# async def run_async_simple_client(port):
-#     """Run async client.
-#        read version register 
-#     """
-#     modbus_unit_id = 1
-#     register_tick = 4
-#     # activate debugging
-#     pymodbus_apply_logging_config("DEBUG")
-#
-#     print("get client")
-#     client: ModbusClient.ModbusBaseClient
-#
-#     client = ModbusClient.AsyncModbusSerialClient(
-#         port,
-#         # timeout=10,
-#         # retries=3,
-#         baudrate=38400,
-#         bytesize=8,
-#         parity="N",
-#         stopbits=1,
-#         # handle_local_echo=False,
-#     )
-#
-#     print("connect to server")
-#     await client.connect()
-#     # test client is connected
-#     assert client.connected
-#
-#     print("get and verify data")
-#     # try:
-#     #     # See all calls in client_calls.py
-#     #     rr = await client.read_coils(address=1, count=1, slave=1)
-#     # except ModbusException as exc:
-#     #     print(f"Received ModbusException({exc}) from library")
-#     #     client.close()
-#     #     return
-#     # if rr.isError():
-#     #     print(f"Received exception from device ({rr})")
-#     #     # THIS IS NOT A PYTHON EXCEPTION, but a valid modbus message
-#     #     client.close()
-#     #     return
-#     try:
-#         # See all calls in client_calls.py
-#         # Getting the current date and time
-#         dt = datetime.now()
-#
-#         # getting the timestamp
-#         #ts = int(datetime.timestamp(dt))
-#         #print(f"timestamp {ts}")
-#         ts = random.getrandbits(16)
-#         rr = await client.write_register(address=register_tick, value=ts, slave=modbus_unit_id)
-#     except ModbusException as exc:
-#         print(f"Received ModbusException({exc}) from library")
-#         client.close()
-#         return
-#     if rr.isError():
-#         print(f"Received exception from device ({rr})")
-#         # THIS IS NOT A PYTHON EXCEPTION, but a valid modbus message
-#         client.close()
-#         return
-#     #value_int32 = client.convert_from_registers(rr.registers, data_type=client.DATATYPE.INT32)
-#     #print(f"Got int32: {value_int32}")
-#     print("close connection")
-#     client.close()
-
-
 if __name__ == "__main__":
-    # asyncio.run(
-    #     run_async_simple_client("/dev/ttyUSB0"), debug=True
-    # )
     import minimalmodbus
     from datetime import datetime
     import time
 
-    instrument = minimalmodbus.Instrument(port='/dev/ttyUSB0', slaveaddress=0)
-    instrument.serial.baudrate = 38400
+    instrument = minimalmodbus.Instrument(port='/dev/ttyAMA0', slaveaddress=0)
+    instrument.serial.baudrate = 57600
     instrument.serial.bytesize = 8
     instrument.serial.parity = minimalmodbus.serial.PARITY_NONE
     instrument.serial.stopbits = 1
-    instrument.serial.timeout = 0.2
+    instrument.serial.timeout = 0
     instrument.mode = minimalmodbus.MODE_RTU
     instrument.clear_buffers_before_each_transaction = True
 
     try:
-        for data in [0x0000, 0x0F0F, 0x0101, 0x0202, 0x0303, 0x0404, 0xFFFF]:
-            print(f"send {data}")
+        for data in [0x0001, 0x0002, 0x0004, 0x0008, 0x0010, 0x0020, 0x0040, 0x0080, 0x0000]:
+            print(f"send {data:04x}")
             instrument.write_register(0, data)
-            time.sleep(1);
+            time.sleep(2);
     except IOError as error_msg:
         #error_msg = "Failed to read from device"
         error_time = datetime.now()

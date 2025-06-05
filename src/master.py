@@ -24,11 +24,6 @@ if __name__ == "__main__":
     logger.addHandler(fh)
     logger.addHandler(ch)
     
-    #beatlogger = logging.getLogger("beats")
-    #beatlogger.setLevel(logging.INFO)
-    #bfh = RotatingFileHandler(config.beatslogFile, maxBytes=102400, backupCount=1)
-    #beatlogger.addHandler(bfh)
-    
     Pins.pinsInit()
     
     """ queue use tuple (CMD, VALUE)
@@ -46,8 +41,8 @@ if __name__ == "__main__":
     bd.start()
     logger.info('beatDetector started')
 
-    #cp = CommunicationProcessor.CommunicationProcessor(config, queue)
-    #cp.start()
-    #logger.info('CommunicationProcessor started')
+    cp = CommunicationProcessor.CommunicationProcessor(config, queue)
+    cp.start()
+    logger.info('CommunicationProcessor started')
     
    
