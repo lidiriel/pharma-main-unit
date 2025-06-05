@@ -25,7 +25,7 @@ class InterfaceProcessor(threading.Thread):
             self.lcd_status = True
         except Exception as e:
             self.logger.error(f"LCD error {e}")
-        self.seq_name = "sequence1"
+        self.seq_name = self.config.interface_default_seq
         self.queue.put(("CHG_SEQ",self.seq_name))
     
     def get_ip_address(self):
