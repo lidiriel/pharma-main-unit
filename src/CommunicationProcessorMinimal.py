@@ -15,9 +15,10 @@ class CommunicationProcessorMinimal(threading.Thread):
         super().__init__()
         self.config = config
         self.queue = queue
+        self.logger = logging.getLogger('CommunicationProcessorMinimal')
         if self.config.com_modbus_debug:
-            self.logger = logging.getLogger('CommunicationProcessorMinimal').setLevel(logging.DEBUG)
-        self.logger = logging.getLogger('CommunicationProcessorMinimal').setLevel(logging.ERROR)
+            self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.ERROR)
 
         self.instrument = minimalmodbus.Instrument(port='/dev/ttyAMA0', slaveaddress=0)
         self.instrument.serial.baudrate = config.com_serial_baudrate
