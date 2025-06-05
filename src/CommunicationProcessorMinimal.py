@@ -18,7 +18,8 @@ class CommunicationProcessorMinimal(threading.Thread):
         self.logger = logging.getLogger('CommunicationProcessorMinimal')
         if self.config.com_modbus_debug:
             self.logger.setLevel(logging.DEBUG)
-        self.logger.setLevel(logging.ERROR)
+        else:
+            self.logger.setLevel(logging.ERROR)
 
         self.instrument = minimalmodbus.Instrument(port='/dev/ttyAMA0', slaveaddress=0)
         self.instrument.serial.baudrate = config.com_serial_baudrate
@@ -44,7 +45,7 @@ class CommunicationProcessorMinimal(threading.Thread):
             
         # default sequence if not loaded at startup
         sequence = deque(["RAND"])
-
+        clk_id = time.CLOCK_REALTIME
         while True:
             (cmd, value) = self.queue.get(block=True)
             try:
@@ -59,7 +60,8 @@ class CommunicationProcessorMinimal(threading.Thread):
                     else:
                         code = int(element,0) # first element
                     self.instrument.write_register(REGISTER_LED, code)
-                    self.logger.debug(f"sended code {code:4x}")
+                    my_time = time.clock_gettime(clk_id) - value
+                    self.logger.debug(f"sended code {code:#04x} sending latency {my_time}")
                 elif cmd == "CHG_SEQ":
                     try:
                         self.logger.info(f"Change sequence to {value}")
