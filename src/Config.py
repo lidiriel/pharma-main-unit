@@ -13,4 +13,4 @@ class Config(object):
         self.beat_debug = False
         self.com_modbus_debug = True
         self.com_serial_port = '/dev/ttyAMA0'
-        self.com_serial_baudrate = 76800
+        self.com_serial_baudrate = 9600

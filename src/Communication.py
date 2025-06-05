@@ -22,6 +22,23 @@ class Communication(threading.Thread):
 
         self.com_serial = serial.Serial(self.config.com_serial_port, baudrate=self.config.com_serial_baudrate)
 
+    def crc8(self, data: bytes) -> int:
+        crc = 0x00
+        for byte in data:
+            crc ^= byte
+            for _ in range(8):
+                if crc & 0x80:
+                    crc = ((crc << 1) ^ 0x07) & 0xFF
+                else:
+                    crc = (crc << 1) & 0xFF
+        return crc
+    
+    def send_data(self, data1, data2):
+        payload = bytes([data1, data2])
+        crc = self.crc8(payload)
+        frame = bytes([0xAA]) + payload + bytes([crc, 0x55])
+        self.com_serial.write(frame)
+
     def run(self):
         data = None
         try:
@@ -54,7 +71,7 @@ class Communication(threading.Thread):
                         code = int(element,0) # first element
                     codeA = code & 0x00FF
                     codeB = (code >> 8) & 0x00FF
-                    self.com_serial.write(bytes([0xAA, codeA, codeB, 0x55]))
+                    self.send_data(codeA, codeB)
                     my_time = time.clock_gettime(clk_id) - value
                     self.logger.debug(f"sended code {code:#04x} sending latency {my_time}")
                     self.sequence_idx = (self.sequence_idx + 1) % self.sequence_len
