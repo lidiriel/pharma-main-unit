@@ -6,6 +6,7 @@ import cherrypy
 import json
 import subprocess
 import logging
+import Config
 
 """ for restarting service after config update
     wee need the name PHARMA_SERVICE
@@ -16,7 +17,8 @@ class Programmation(object):
     fname="../config/cross.json"
     command_list = ['RAND']
     
-    def __init__(self):
+    def __init__(self, config):
+        self.config = config
         self.logger = logging.getLogger('PharmaWebControl')
         self.logger.setLevel(logging.INFO)
     
@@ -121,7 +123,7 @@ if __name__ == '__main__':
             'tools.staticdir.dir': './public'
         }
     }
-
-    webapp = Programmation()
+    config = Config()
+    webapp = Programmation(config)
     cherrypy.server.socket_host = '0.0.0.0'
     cherrypy.quickstart(webapp, '/', conf)
