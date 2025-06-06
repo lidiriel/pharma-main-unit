@@ -7,6 +7,7 @@ import json
 import subprocess
 import logging
 import Config
+from logging.handlers import RotatingFileHandler
 
 """ for restarting service after config update
     wee need the name PHARMA_SERVICE
@@ -19,8 +20,12 @@ class Programmation(object):
     
     def __init__(self, config):
         self.config = config
-        self.logger = logging.getLogger('PharmaWebControl')
+        self.logger = logging.getLogger()
         self.logger.setLevel(logging.INFO)
+        fh = RotatingFileHandler(config.logFile, maxBytes=102400, backupCount=2)
+        fh.setLevel(logging.INFO)
+        self.logger.addHandler(fh)
+        self.logger.info("Webservice Pharma started")
     
     def load_sequences(self, fname="../config/cross.json"):
         sequences = {}

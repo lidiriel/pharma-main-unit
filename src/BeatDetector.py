@@ -42,7 +42,7 @@ class BeatDetector(threading.Thread):
                 return i
         return None
         
-    # === Distribution logarithmique des fréquences ===
+    # === logarithm frequency distribution ===
     def log_frequency_bands(self, n_freqs=CHUNK, n_bands=N_BANDS):
         bins = [0]
         log_sizes = np.logspace(0, 1, num=n_bands, base=10)
@@ -88,7 +88,7 @@ class BeatDetector(threading.Thread):
                 input_device_index=device_index,
                 frames_per_buffer=CHUNK)
 
-        # === Historique énergie pour chaque bande ===
+        # === Energy history for each band ===
         energy_history = [deque(maxlen=ENERGY_HISTORY) for _ in range(N_BANDS)]
 
         bands = self.log_frequency_bands()
@@ -157,7 +157,6 @@ class BeatDetector(threading.Thread):
             if self.config.beat_debug:
                 visual = ''.join(['#' if beats_detected[i] else '-' for i in range(N_BANDS)])
                 print(visual)
-            #time.sleep(0.03)
             
             
             
