@@ -128,7 +128,7 @@ if __name__ == '__main__':
             'tools.staticdir.dir': './public'
         }
     }
-    config = Config()
+    config = Config.Config()
     webapp = Programmation(config)
     cherrypy.server.socket_host = '0.0.0.0'
     cherrypy.quickstart(webapp, '/', conf)
