@@ -4,12 +4,21 @@ import random
 import string
 import cherrypy
 import json
+import subprocess
+import logging
 
-
+""" for restarting service after config update
+    wee need the name PHARMA_SERVICE
+"""
+PHARMA_SERVICE = "pharma"
 
 class Programmation(object):
     fname="../config/cross.json"
     command_list = ['RAND']
+    
+    def __init__(self):
+        self.logger = logging.getLogger('PharmaWebControl')
+        self.logger.setLevel(logging.INFO)
     
     def load_sequences(self, fname="../config/cross.json"):
         sequences = {}
@@ -20,6 +29,14 @@ class Programmation(object):
         with config_file:
             sequences = json.load(config_file)
         return sequences
+    
+    def restart_service(self, service_name):
+        try:
+            # Redémarrer le service avec systemctl
+            subprocess.run(["systemctl", "restart", service_name], check=True)
+            self.logger.info(f"Service {service_name} restarted.")
+        except subprocess.CalledProcessError as e:
+            self.logger.error(f"Error on restart service {service_name} : {e}")
     
     @cherrypy.expose
     def index(self):
@@ -55,6 +72,7 @@ class Programmation(object):
             f.close()
         except OSError:
             cherrypy.log(f"Could not open/read file:{fname}")
+        self.restart_service(PHARMA_SERVICE)
             
 
     
