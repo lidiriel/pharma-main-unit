@@ -1,15 +1,13 @@
 import threading
-import Pins
 import time
 import logging
 import json
 import random
-from Pins import PINS
 import serial
 
 REGISTER_LED = 0
 
-class Communication(threading.Thread):
+class CommandProcessor(threading.Thread):
     def __init__(self, config, queue):
         super().__init__()
         self.config = config
