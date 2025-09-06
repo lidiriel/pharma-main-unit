@@ -1,143 +1,62 @@
-# This file may be used to create an environment using:
-# $ conda create --name <env> --file <this file>
-# platform: linux-64
-# created-by: conda 24.9.2
-_libgcc_mutex=0.1=main
-_openmp_mutex=5.1=1_gnu
-aiohappyeyeballs=2.6.1=pyhd8ed1ab_0
-aiohttp=3.11.13=py313h8060acc_0
-aiosignal=1.3.2=pyhd8ed1ab_0
-alsa-lib=1.2.13=hb9d3cd8_0
-attrs=25.1.0=pyh71513ae_0
-blas=1.0=openblas
-brotli-python=1.0.9=py313h6a678d5_9
-bzip2=1.0.8=h5eee18b_6
-c-ares=1.19.1=h5eee18b_0
-ca-certificates=2025.2.25=h06a4308_0
-certifi=2025.1.31=py313h06a4308_0
-cffi=1.17.1=py313h1fdaa30_1
-charset-normalizer=3.3.2=pyhd3eb1b0_0
-cheroot=8.5.2=py313h06a4308_1
-cherrypy=18.10.0=py313h78bf25f_1
-click=8.1.8=py313h06a4308_0
-contourpy=1.3.1=py313hdb19cb5_0
-cryptography=44.0.1=py313h7825ff9_0
-cycler=0.11.0=pyhd3eb1b0_0
-cyrus-sasl=2.1.28=h52b45da_1
-docopt=0.6.2=py313h06a4308_1
-expat=2.6.4=h6a678d5_0
-fontconfig=2.14.1=h55d465d_3
-fonttools=4.55.3=py313h5eee18b_0
-freetype=2.13.3=h4a9f257_0
-frozenlist=1.5.0=py313h8060acc_1
-icu=73.1=h6a678d5_0
-idna=3.10=pyhd8ed1ab_1
-jack=1.9.22=h7c63dc7_2
-jaraco.classes=3.2.1=pyhd3eb1b0_0
-jaraco.collections=3.3.0=pyhd3eb1b0_0
-jaraco.functools=4.1.0=py313h06a4308_0
-jaraco.text=3.5.1=py313h06a4308_3
-jpeg=9e=h5eee18b_3
-kiwisolver=1.4.8=py313h6a678d5_0
-krb5=1.20.1=h143b758_1
-lcms2=2.16=h92b89f2_1
-ld_impl_linux-64=2.40=h12ee557_0
-lerc=4.0.0=h6a678d5_0
-libabseil=20250127.0=cxx17_h6a678d5_0
-libcups=2.4.2=h2d74bed_1
-libcurl=8.12.1=hc9e6f67_0
-libdb=6.2.32=h6a678d5_1
-libdeflate=1.22=h5eee18b_0
-libedit=3.1.20230828=h5eee18b_0
-libev=4.33=h7f8727e_1
-libffi=3.4.4=h6a678d5_1
-libgcc=14.2.0=h767d61c_2
-libgcc-ng=14.2.0=h69a702a_2
-libgfortran-ng=11.2.0=h00389a5_1
-libgfortran5=11.2.0=h1234567_1
-libglib=2.78.4=hdc74915_0
-libgomp=14.2.0=h767d61c_2
-libiconv=1.16=h5eee18b_3
-libmpdec=4.0.0=h5eee18b_0
-libnghttp2=1.57.0=h2d74bed_0
-libopenblas=0.3.21=h043d6bf_0
-libopus=1.3.1=h5eee18b_1
-libpng=1.6.39=h5eee18b_0
-libpq=17.4=hdbd6064_0
-libprotobuf=5.29.3=hc99497a_0
-libssh2=1.11.1=h251f7ec_0
-libstdcxx=14.2.0=h8f9b012_2
-libstdcxx-ng=14.2.0=h4852527_2
-libtiff=4.7.0=hde9077f_0
-libuuid=1.41.5=h5eee18b_0
-libwebp-base=1.3.2=h5eee18b_1
-libxcb=1.15=h7f8727e_0
-libxkbcommon=1.0.1=h097e994_2
-libxml2=2.13.7=hfdd30dd_0
-lz4-c=1.9.4=h6a678d5_1
-matplotlib=3.10.0=py313h06a4308_1
-matplotlib-base=3.10.0=py313h68cf311_1
-minimalmodbus=2.1.1=pyh5041855_1
-more-itertools=10.3.0=py313h06a4308_0
-multidict=6.1.0=py313h8060acc_2
-mysql=8.4.0=h721767e_2
-ncurses=6.4=h6a678d5_0
-numpy=2.2.4=py313h3a69d60_0
-numpy-base=2.2.4=py313habf87d0_0
-openjpeg=2.5.2=h0d4d230_1
-openldap=2.6.4=h42fbc30_0
-openssl=3.4.1=h7b32b05_0
-packaging=24.2=py313h06a4308_0
-pcre2=10.42=hebb0a14_1
-pillow=11.1.0=py313hac6e08b_1
-pip=25.0=py313h06a4308_0
-pipreqs=0.4.13=pyhd8ed1ab_0
-portaudio=19.7.0=hf4617a5_0
-portend=2.7.1=pyhd3eb1b0_0
-prompt-toolkit=3.0.43=py313h06a4308_0
-prompt_toolkit=3.0.43=hd3eb1b0_0
-propcache=0.2.1=py313h8060acc_1
-pyaudio=0.2.14=py313he16d9e2_2
-pycparser=2.21=pyhd3eb1b0_0
-pygments=2.19.1=py313h06a4308_0
-pymodbus=2.5.3=pyhd8ed1ab_0
-pyopenssl=25.0.0=py313h06a4308_0
-pyparsing=3.2.0=py313h06a4308_0
-pyqt=6.7.1=py313h6a678d5_0
-pyqt6-sip=13.9.1=py313h5eee18b_0
-pyserial=3.5=pyhd8ed1ab_1
-pyserial-asyncio=0.6=pyhd8ed1ab_1
-pysocks=1.7.1=py313h06a4308_0
-python=3.13.2=hf623796_100_cp313
-python-dateutil=2.9.0post0=py313h06a4308_2
-python_abi=3.13=0_cp313
-pytz=2024.1=py313h06a4308_0
-qtbase=6.7.3=hdaa5aa8_0
-qtdeclarative=6.7.3=h6a678d5_0
-qtsvg=6.7.3=he621ea3_0
-qttools=6.7.3=h80c7b02_0
-qtwebchannel=6.7.3=h6a678d5_0
-qtwebsockets=6.7.3=h6a678d5_0
-readline=8.2=h5eee18b_0
-repoze.lru=0.7=py313h06a4308_1
-requests=2.32.3=py313h06a4308_1
-routes=2.5.1=py313h06a4308_1
-setuptools=72.1.0=py313h06a4308_0
-simplejson=3.19.2=py313h5eee18b_1
-sip=6.10.0=py313h6a678d5_0
-six=1.16.0=pyhd3eb1b0_1
-sqlite=3.45.3=h5eee18b_0
-tempora=4.1.1=pyhd3eb1b0_0
-tk=8.6.14=h39e8969_0
-tornado=6.4.2=py313h5eee18b_0
-tzdata=2025a=h04d1e81_0
-urllib3=2.3.0=py313h06a4308_0
-wcwidth=0.2.5=pyhd3eb1b0_0
-wheel=0.45.1=py313h06a4308_0
-xcb-util-cursor=0.1.4=h5eee18b_0
-xz=5.6.4=h5eee18b_1
-yarg=0.1.9=py_1
-yarl=1.18.3=py313h8060acc_1
-zc.lockfile=2.0=pyhd3eb1b0_0
-zlib=1.2.13=h5eee18b_1
-zstd=1.5.6=hc292b87_0
+aiohappyeyeballs @ file:///home/conda/feedstock_root/build_artifacts/aiohappyeyeballs_1741775197943/work
+aiohttp @ file:///home/conda/feedstock_root/build_artifacts/aiohttp_1740481426959/work
+aiosignal @ file:///home/conda/feedstock_root/build_artifacts/aiosignal_1734342155601/work
+attrs @ file:///home/conda/feedstock_root/build_artifacts/attrs_1737819173731/work
+Brotli @ file:///croot/brotli-split_1736182456865/work
+certifi @ file:///croot/certifi_1754570635119/work/certifi
+cffi @ file:///croot/cffi_1736182485317/work
+charset-normalizer @ file:///croot/charset-normalizer_1721748349566/work
+cheroot @ file:///work/perseverance-python-buildout/croot/cheroot_1728414558827/work
+CherryPy @ file:///home/conda/feedstock_root/build_artifacts/cherrypy_1733382638354/work
+click @ file:///croot/click_1744271578095/work
+contourpy @ file:///croot/contourpy_1732540045555/work
+cryptography @ file:///croot/cryptography_1740577825284/work
+cycler @ file:///tmp/build/80754af9/cycler_1637851556182/work
+docopt @ file:///work/perseverance-python-buildout/croot/docopt_1728403030048/work
+fonttools @ file:///croot/fonttools_1737039080035/work
+frozenlist @ file:///home/conda/feedstock_root/build_artifacts/frozenlist_1737645236190/work
+idna @ file:///home/conda/feedstock_root/build_artifacts/idna_1733211830134/work
+jaraco.classes @ file:///tmp/build/80754af9/jaraco.classes_1620983179379/work
+jaraco.collections @ file:///tmp/build/80754af9/jaraco.collections_1617120945298/work
+jaraco.functools @ file:///croot/jaraco.functools_1740408111753/work
+jaraco.text @ file:///io/perseverance-python-buildout/croot/jaraco.text_1731711106107/work
+kiwisolver @ file:///croot/kiwisolver_1737039087198/work
+matplotlib==3.10.0
+minimalmodbus @ file:///home/conda/feedstock_root/build_artifacts/minimalmodbus_1735228319753/work
+more-itertools @ file:///work/perseverance-python-buildout/croot/more-itertools_1728388668839/work
+multidict @ file:///home/conda/feedstock_root/build_artifacts/multidict_1733913043842/work
+numpy @ file:///croot/numpy_and_numpy_base_1742570410886/work/dist/numpy-2.2.4-cp313-cp313-linux_x86_64.whl#sha256=ae3b853b3cc894a813af5458bc750f96a039e334e8c4e4ae5ac840a34a6fce64
+packaging @ file:///croot/packaging_1734472117206/work
+pillow @ file:///croot/pillow_1744613067434/work
+pipreqs==0.4.13
+portend @ file:///tmp/build/80754af9/portend_1613763469178/work
+prompt_toolkit @ file:///work/perseverance-python-buildout/croot/prompt-toolkit_1728511366266/work
+propcache @ file:///home/conda/feedstock_root/build_artifacts/propcache_1737635528546/work
+PyAudio @ file:///home/conda/feedstock_root/build_artifacts/pyaudio_1730446190121/work
+pycparser @ file:///tmp/build/80754af9/pycparser_1636541352034/work
+Pygments @ file:///croot/pygments_1744664109463/work
+pymodbus @ file:///home/conda/feedstock_root/build_artifacts/pymodbus_1644118792326/work
+pyOpenSSL @ file:///croot/pyopenssl_1741343803032/work
+pyparsing @ file:///io/buildout/croot/pyparsing_1735862672222/work
+PyQt6==6.7.1
+PyQt6_sip @ file:///croot/pyqt-split_1740498191142/work/pyqt_sip
+pyserial @ file:///home/conda/feedstock_root/build_artifacts/pyserial_1734140157046/work
+pyserial-asyncio @ file:///home/conda/feedstock_root/build_artifacts/pyserial-asyncio_1736238971283/work
+PySocks @ file:///work/perseverance-python-buildout/croot/pysocks_1728386193338/work
+python-dateutil @ file:///work/perseverance-python-buildout/croot/python-dateutil_1728385355105/work
+pytz @ file:///work/perseverance-python-buildout/croot/pytz_1728386814080/work
+repoze.lru @ file:///io/buildout/croot/repoze.lru_1735844573621/work
+requests @ file:///croot/requests_1730999120400/work
+Routes @ file:///io/buildout/croot/routes_1735863402981/work
+setuptools==72.1.0
+simplejson @ file:///croot/simplejson_1736541135481/work
+sip @ file:///croot/sip_1738856193618/work
+six @ file:///tmp/build/80754af9/six_1644875935023/work
+tempora @ file:///tmp/build/80754af9/tempora_1624535136503/work
+tornado @ file:///io/buildout/croot/tornado_1735842129908/work
+urllib3 @ file:///croot/urllib3_1737133630106/work
+wcwidth @ file:///Users/ktietz/demo/mc3/conda-bld/wcwidth_1629357192024/work
+wheel==0.45.1
+yarg==0.1.9
+yarl @ file:///home/conda/feedstock_root/build_artifacts/yarl_1737575777699/work
+zc.lockfile @ file:///Users/ktietz/demo/mc3/conda-bld/zc.lockfile_1629299854832/work
