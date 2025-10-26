@@ -1,12 +1,10 @@
 import threading
 import logging
 import time
-import Pins
 import pyaudio
 from time import perf_counter
 import numpy as np
 import json
-import random
 from collections import deque
 
 """ I2S ADC parameters
@@ -74,11 +72,11 @@ class BeatDetector(threading.Thread):
             self.logger.error(f"Error Invalid JSON content {self.config.patterns_file}")
         except Exception as e:
             self.logger.error(f"Unexpected error : {e}")
-        
-        device_index = self.find_input_device(name=self.config.beat_device_name)
+        device_name = self.config.beat_device_name
+        device_index = self.find_input_device(name=device_name)
         if device_index is None:
-            self.logger.error("Périphérique d'entrée non trouvé.")
-            raise RuntimeError("Périphérique d'entrée non trouvé.")
+            self.logger.error(f"Périphérique d'entrée {device_name} non trouvé. Check asoundrc")
+            raise RuntimeError("Périphérique d'entrée {device_name} non trouvé. Check asoundrc")
 
 
         stream = self.pa.open(format=SAMPLE_FORMAT,

@@ -1,5 +1,4 @@
-import wiringpi
-
+import RPi.GPIO as GPIO
 """ 
     Reserved GPIO
     GPIO 2    I2C SDA
@@ -18,14 +17,8 @@ PINS = {
 
 
 def pinsInit():
-    wiringpi.wiringPiSetup()
+    GPIO.setmode(GPIO.BCM)
     for pin in PINS.values():
-        wiringpi.pinMode(pin, wiringpi.OUTPUT)
+        GPIO.setup(pin, GPIO.OUT)
 
 
-def pinsWrite(pinName, v):
-    if v:
-        pinState = wiringpi.HIGH
-    else:
-        pinState = wiringpi.LOW
-    wiringpi.digitalWrite(PINS[pinName], pinState)

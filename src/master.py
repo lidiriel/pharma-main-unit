@@ -7,7 +7,6 @@ import BeatDetector
 import Pins
 from logging.handlers import RotatingFileHandler
 
-
 if __name__ == "__main__":
     config = Config.Config()
 
@@ -23,6 +22,7 @@ if __name__ == "__main__":
     logger.addHandler(fh)
     #logger.addHandler(ch)
     
+    # init pin to output
     Pins.pinsInit()
     
     """ queue use tuple (CMD, VALUE)
