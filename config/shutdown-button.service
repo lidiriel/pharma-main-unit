@@ -3,7 +3,7 @@ Description="Shutdown on GPIO button press"
 After=multi-user.target
 
 [Service]
-ExecStart=/bin/bash -c 'python shutdown.py'
+ExecStart=/bin/bash -c 'source /home/compost/pharma-venv/bin/activate && python shutdown.py'
 Restart=always
 User=root
 WorkingDirectory=/home/compost/pharma-main-unit/src/

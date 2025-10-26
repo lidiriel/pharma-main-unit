@@ -1,12 +1,12 @@
 [Unit]
-Description="master process for pharma"
+Description="Master process for pharma"
 After=network.target
 
 [Service]
 Type=simple
 User=compost
 GuessMainPID=yes
-ExecStart=/bin/bash -c 'source /home/compost/pharma/bin/activate && python master.py'
+ExecStart=/bin/bash -c 'source /home/compost/pharma-venv/bin/activate && python master.py'
 ExecStop=kill -SIGINT $mainpid
 Restart=on-failure
 WorkingDirectory=/home/compost/pharma-main-unit/src/
