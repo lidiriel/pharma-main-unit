@@ -1,0 +1,60 @@
+/dts-v1/;
+/plugin/;
+
+/* Device Tree Overlay for generic I2S audio output on Raspberry Pi
+*/
+
+/ {
+    compatible = "brcm,bcm2835";
+
+    fragment@0 {
+        target = <&i2s>;
+        __overlay__ {
+	    #sound-dai-cells = <0>;
+            status = "okay";
+        };
+    };
+
+    fragment@1 {
+        target-path = "/";
+        __overlay__ {
+            card_codec: spdif-receiver {
+                #address-cells = <0>;
+                #size-cells = <0>;
+                #sound-dai-cells = <0>;
+                /* 
+                    "linux,spdif-dir" is used in generic I2S(receiver) driver.                     
+                    You can see details "linux,spdif-dir" by bellow command
+                    modinfo snd_soc_spdif_rx
+                */
+                compatible = "linux,spdif-dir";
+                status = "okay";
+            };
+        };
+    };
+
+    fragment@2 {
+        target = <&sound>;
+        master_overlay: __overlay__ {
+            compatible = "simple-audio-card";
+            simple-audio-card,name = "ADCWM8782";
+            simple-audio-card,format = "i2s";
+            simple-audio-card,bitclock-master = <&dailink0_master>;
+            simple-audio-card,frame-master = <&dailink0_master>;
+            status="okay";
+
+            simple-audio-card,cpu {
+            	sound-dai = <&i2s>;
+ 		/* TDM slot configuration - BCLK ratio: 64 x Fs (2 x 32 bit) */
+                    /*dai-tdm-slot-num = <2>;
+                    dai-tdm-slot-width = <32>;*/
+            };
+
+            dailink0_master: simple-audio-card,codec {
+            	sound-dai = <&card_codec>;
+            };
+
+        };
+    };
+
+};
