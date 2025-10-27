@@ -58,6 +58,7 @@ class CommandProcessor(threading.Thread):
         while True:
             (cmd, value) = self.queue.get(block=True)
             try:
+                self.logger.info(f"{cmd} {value}")
                 if cmd == "BEAT":
                     element = self.sequence[self.sequence_idx]
                     code = 0
@@ -70,7 +71,7 @@ class CommandProcessor(threading.Thread):
                     codeA = code & 0x00FF
                     codeB = (code >> 8) & 0x00FF
                     self.send_data(codeA, codeB)
-                    my_time = time.clock_gettime(clk_id) - value
+                    my_time = time.clock_gettime(clk_id) - float(value)
                     self.logger.debug(f"sended code {code:#04x} sending latency {my_time}")
                     self.sequence_idx = (self.sequence_idx + 1) % self.sequence_len
                 elif cmd == "CHG_SEQ":

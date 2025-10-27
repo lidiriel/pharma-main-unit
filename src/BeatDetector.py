@@ -27,7 +27,7 @@ class BeatDetector(threading.Thread):
         self.queue = queue
         self.pa = pyaudio.PyAudio()
         self.logger = logging.getLogger('BeatDetector')
-        self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(logging.DEBUG)
         self.clk_id = time.CLOCK_REALTIME
         
     
@@ -99,19 +99,24 @@ class BeatDetector(threading.Thread):
         filtered_bands = []
         filtered_indices = []
         filtered_frequency = []
+        band_weight = []
+        filtered_band_weight = []
         for i, (start, end) in enumerate(bands):
             start_freq = band_to_freq(start)
             end_freq = band_to_freq(end)
+            band_weight.append(((end-start)+1)/CHUNK)
             if (start_freq <= self.config.beat_min_freq and self.config.beat_min_freq <= end_freq) or \
                     (self.config.beat_min_freq <= start_freq and end_freq <= self.config.beat_max_freq) or \
                     (start_freq <= self.config.beat_max_freq and self.config.beat_max_freq <= end_freq):
                 filtered_bands.append((start, end))
                 filtered_indices.append(i)
                 filtered_frequency.append((start_freq,end_freq))
-        self.logger.debug("### filtered bands")
-        self.logger.debug(f"bands = {filtered_bands}")
-        self.logger.debug(f"frequency = {filtered_frequency}")
-        self.logger.debug(f"indices (band number) = {filtered_indices}")
+                filtered_band_weight.append(band_weight[i])
+        self.logger.info("### filtered bands")
+        self.logger.info(f"bands = {filtered_bands}")
+        self.logger.info(f"frequency = {filtered_frequency}")
+        self.logger.info(f"indices (band number) = {filtered_indices}")
+        self.logger.info(f"filtered band weight = {filtered_band_weight}")
 
         prev_beat = perf_counter()
         beats_empty = [0]*N_BANDS
@@ -126,8 +131,8 @@ class BeatDetector(threading.Thread):
 
             for iband in filtered_indices:
                 start, end = bands[iband]
-                band_weight = ((end - start) + 1) / CHUNK
-                energy = band_weight * np.sum(spectrum[start:end] ** 2)
+                #band_weight = ((end - start) + 1) / CHUNK
+                energy = band_weight[iband] * np.sum(spectrum[start:end] ** 2)
                 energy_history[iband].append(energy)
                 if energy < self.config.beat_min_energy:
                     beats_detected[iband] = 0
@@ -138,19 +143,14 @@ class BeatDetector(threading.Thread):
                 #std = np.std(energy_history[iband])
                 ratio = energy / mean
                 beats_detected[iband] = (1 if ratio > self.config.beat_c_factor  else 0)
-                if self.config.beat_debug:
-                    #print(energy_history[iband])
-                    #print(f"Bande {iband:02d} | Energie: {energy_history[iband][-1]:.2e} | Moyenne: {mean:.2e} | Ratio {ratio:.2e} | Std: {std:.2e} | Var: {var:.2e} | Beat: {'#' if beats_detected[iband] else '-'}")
-                    pass       
-            if sum(beats_detected) >= 1:
+                if self.config.beat_full_debug:
+                    print(f"Bande {iband:02d} | Energie: {energy_history[iband][-1]:.2e} | Moyenne: {mean:.2e} | Ratio {ratio:.2e} | Beat: {'#' if beats_detected[iband] else '-'}")      
+            if sum(beats_detected) > 0:
                 curr_time = time.clock_gettime(self.clk_id)
                 if (curr_time - prev_beat) > self.config.beat_interval:
-                    # < 180 BPM max
+                    # interval between two beat in seconds (example 180BPM = 0.33s)
                     self.queue.put(("BEAT",curr_time))
                     prev_beat = curr_time
-                else:
-                    # > 180 BPM
-                    beats_detected = beats_empty
                                                                                 
             if self.config.beat_debug:
                 visual = ''.join(['#' if beats_detected[i] else '-' for i in range(N_BANDS)])

@@ -1,4 +1,5 @@
-
+""" In production do not use debug mode
+"""
 class Config(object):
     def __init__(self):
         self.logFile = '/tmp/pharma.log'
@@ -11,6 +12,7 @@ class Config(object):
         self.beat_c_factor = 5
         self.beat_interval = 0.33
         self.beat_debug = False
+        self.beat_full_debug = False
         self.com_debug = False
         self.com_serial_port = '/dev/ttyAMA0'
         self.com_serial_baudrate = 57600

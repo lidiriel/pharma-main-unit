@@ -11,9 +11,9 @@ if __name__ == "__main__":
     config = Config.Config()
 
     logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
+    #logger.setLevel(logging.DEBUG)
     fh = RotatingFileHandler(config.logFile, maxBytes=102400, backupCount=2)
-    fh.setLevel(logging.INFO)
+    fh.setLevel(logging.DEBUG)
     # ch = logging.StreamHandler()
     #ch.setLevel(logging.ERROR)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -38,7 +38,7 @@ if __name__ == "__main__":
    
     bd = BeatDetector.BeatDetector(config, queue)
     bd.start()
-    logger.info('beatDetector started')
+    logger.info('BeatDetector started')
 
     cp = CommandProcessor.CommandProcessor(config, queue)
     cp.start()
