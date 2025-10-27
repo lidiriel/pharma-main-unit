@@ -4,7 +4,7 @@ class Config(object):
         self.logFile = '/tmp/pharma.log'
         self.weblogFile = '/tmp/pharma-web.log'
         self.patterns_file = '/home/compost/pharma-main-unit/config/cross.json'
-        self.beat_device_name = 'adc_sv'
+        self.beat_device_name = 'adc_hw'
         self.beat_min_freq = 50
         self.beat_max_freq = 4000
         self.beat_min_energy = 1e17
