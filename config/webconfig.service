@@ -1,7 +1,7 @@
 [Unit]
 Description="Web config for pharma"
 Wants=network.target
-After=syslog.target network.target
+After=default.target
 
 
 [Service]
@@ -16,6 +16,6 @@ Environment=PYTHONUNBUFFERED=1
 User=compost
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
 
 

@@ -1,6 +1,7 @@
 [Unit]
 Description="Master process for pharma"
-After=network.target
+Wants=network.target
+After=default.target
 
 [Service]
 Type=simple
@@ -14,6 +15,6 @@ WorkingDirectory=/home/compost/pharma-main-unit/src/
 Environment=PYTHONUNBUFFERED=1
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
 
 
