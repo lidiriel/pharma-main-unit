@@ -6,6 +6,9 @@ from time import perf_counter
 import numpy as np
 import json
 from collections import deque
+from Pins import PINS
+import RPi.GPIO as GPIO
+from threading import Thread
 
 """ I2S ADC parameters
     Algo parameters
@@ -19,6 +22,11 @@ ENERGY_HISTORY = 42
 
 REGISTER_LED = 0
 SEQ_NAME = "sequence1"
+
+def visual_beat():
+    GPIO.output(PINS['BEAT'], GPIO.HIGH)
+    time.sleep(0.02)
+    GPIO.output(PINS['BEAT'], GPIO.LOW)
 
 class BeatDetector(threading.Thread):
     def __init__(self, config, queue):
@@ -151,6 +159,8 @@ class BeatDetector(threading.Thread):
                     # interval between two beat in seconds (example 180BPM = 0.33s)
                     self.queue.put(("BEAT",curr_time))
                     prev_beat = curr_time
+                    Thread(target=visual_beat).start()
+                    
                                                                                 
             if self.config.beat_debug:
                 visual = ''.join(['#' if beats_detected[i] else '-' for i in range(N_BANDS)])

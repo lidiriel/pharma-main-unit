@@ -16,8 +16,7 @@ class InterfaceProcessor(threading.Thread):
         self.queue = queue
         self.logger = logging.getLogger('InterfaceProcessor')
         # Create PWM object on GPIO12 with frequency 1 Hz
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(PINS['HEART'], GPIO.OUT)
+        # Pin init is doing into master.py
         self.pwm = GPIO.PWM(PINS['HEART'], 0.5)
         self.lcd_status = False
         try:

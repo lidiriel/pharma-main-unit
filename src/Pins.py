@@ -13,6 +13,7 @@ import RPi.GPIO as GPIO
 PINS = {
     'RS485_DE': 17,
     'HEART': 12,
+    'BEAT': 26,
 }
 
 
