@@ -77,7 +77,7 @@ class CommandProcessor(threading.Thread):
                 elif cmd == "CHG_SEQ":
                     try:
                         self.logger.info(f"Change sequence to {value}")
-                        self.sequence = data[value]
+                        self.sequence = data['sequences'][value]
                         self.sequence_idx = 0
                         self.sequence_len = len(self.sequence)
                         self.logger.debug(f"Sequence is now : {self.sequence}")

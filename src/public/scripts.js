@@ -11,13 +11,18 @@ $(function () {
 	var $deleteallButton = $('#deleteall-button');
 	var $progSelect = $('#prog_list');
 	var $saveButton = $('#hex_save');
-	var $dialogSave = $('#dialog-message-save');
+	var $defaultButton = $('#seq_default');
+	var $startStopButton = $('#service_start_stop');
+	var $dialogMessage = $('#dialog-message');
+	var $checkButton = $('#check-button');
+	var $defaultSequenceName = $('#default_sequence_name');
 
     var $leds, $cols, $rows;
 	
-	function dialogSave(sequence_name) {
-	  $dialogSave.attr('title',sequence_name);
-	  $dialogSave.dialog({
+	function myDialog(title, message) {
+	  $dialogMessage.attr('title',title);
+	  $('#message-text').text(message);
+	  $dialogMessage.dialog({
 	    modal: true,
 	    buttons: {
 	      Ok: function() {
@@ -118,21 +123,27 @@ $(function () {
 			if(j<0 && j>5){
 				console.log("invalid value for j="+j);
 			}
+//			const items = [
+//				[0, 0, 5, 0, 0 ],
+//			  	[0, 0, 1, 0, 0 ],
+//			  	[8, 4, 0, 2, 6 ],
+//			  	[0, 0, 3, 0, 0 ],
+//			  	[0, 0, 7, 0, 0 ]];
 			const items = [
-				[0, 0, 5, 0, 0 ],
-			  	[0, 0, 1, 0, 0 ],
-			  	[8, 4, 0, 2, 6 ],
-			  	[0, 0, 3, 0, 0 ],
-			  	[0, 0, 7, 0, 0 ]];
+				[8, 0, 0, 0, 5 ],
+			  	[0, 4, 0, 1, 0 ],
+			  	[0, 0, 0, 0, 0 ],
+			  	[0, 3, 0, 2, 0 ],
+			  	[7, 0, 0, 0, 6 ]];
 			return Number(items[i][j]);
 		},
 		lookup_color_leds: function(i,j) {
 			const items = [
-				['', '', 'g', '', '' ],
-			  	['', '', 'b', '', '' ],
-			  	['g', 'b', '', 'b', 'g' ],
-			  	['', '', 'b', '', '' ],
-			  	['', '', 'g', '', '' ]];
+				['g', '', '', '', 'g' ],
+			  	['', 'b', '', 'b', '' ],
+			  	['', '', '', '', '' ],
+			  	['', 'b', '', 'b', '' ],
+			  	['g', '', '', '', 'g' ]];
 			return items[i][j];
 		},
         tableLeds: function () {
@@ -330,6 +341,30 @@ $(function () {
 		});
 	}
 	
+	function serviceStatus(){
+		var posting = $.post("/service_status");
+		posting.done(function(data) {
+			if(data["status"]){
+				$startStopButton.css('color','green');
+				$startStopButton.prop("value", 'STOP');
+			}else{
+				$startStopButton.css('color','red');
+				$startStopButton.prop("value", 'START');
+			}
+		});
+	}
+	
+	function getDefaultSequenceName(){
+		var posting = $.post("/get_default_sequence_name");
+		posting.done(function(data) {
+			if(data["name"]){
+				$defaultSequenceName.text(data["name"]);
+			}else{
+				$defaultSequenceName.text("unknow");
+			}
+		});
+	}
+	
 	function loadOneSequence(name) {
 		console.log("load sequence name = ", name);
 		var posting = $.post("/load", {"sequence_name" : name});
@@ -460,11 +495,43 @@ $(function () {
 		var posting = $.post("/save", {"sequence_name" : sequence_name, "sequence_value" : $hexList.val()});
 			posting.done(function(data) {
 				console.log("save ok for ", sequence_name);
-				dialogSave(sequence_name);
+				myDialog(sequence_name, "Your sequence have successfully saved.");
 			}).fail(function() {
 			    alert( "error please retry." );
 			})
 	});
+	
+	// set default button
+	$defaultButton.click(function (event) {
+		event.preventDefault();
+		var sequence_name = $progSelect.val();
+		var posting = $.post("/set_default", {"sequence_name" : sequence_name});
+			posting.done(function(data) {
+				console.log("seq sended to main process", sequence_name);
+				myDialog(sequence_name, "Your sequence has set to default.");
+			}).fail(function() {
+			    alert( "error please retry." );
+			})
+		getDefaultSequenceName();
+	});
+	
+	// start / stop service button
+	$startStopButton.click(function (event) {
+			event.preventDefault();
+			var posting = $.post("/service_start_stop");
+				posting.done(function(data) {
+					console.log("start/stop main process");
+					myDialog("start/stop", "main service status has changed (start/stop).");
+			}).fail(function() {
+				   alert( "error please retry." );
+			});
+			serviceStatus();
+	});
+	
+	$checkButton.click(function (event) {
+		serviceStatus();
+	}
+	);
 
 	$( function() {
 		$progSelect.change( function (e) {
@@ -479,8 +546,10 @@ $(function () {
         }
     });
 	
-	$dialogSave.hide();
+	$dialogMessage.hide();
 
 	loadAllSequences();
+	serviceStatus();
+	getDefaultSequenceName();
 
 });

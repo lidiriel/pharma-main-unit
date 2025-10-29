@@ -16,4 +16,3 @@ class Config(object):
         self.com_debug = False
         self.com_serial_port = '/dev/ttyAMA0'
         self.com_serial_baudrate = 57600
-        self.interface_default_seq = "sequence2"

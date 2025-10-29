@@ -7,6 +7,7 @@ from Pins import PINS
 import RPi.GPIO as GPIO
 import time
 import I2C_LCD_driver
+import json
 
 
 class InterfaceProcessor(threading.Thread):
@@ -24,7 +25,21 @@ class InterfaceProcessor(threading.Thread):
             self.lcd_status = True
         except Exception as e:
             self.logger.error(f"LCD error {e}")
-        self.seq_name = self.config.interface_default_seq
+        
+        
+        try:
+            with open(self.config.patterns_file) as f:
+                data = json.load(f)
+                self.logger.info(f"JSON patterns file content : {data}")
+        except FileNotFoundError:
+            self.logger.error(f"Error: File not found {self.config.patterns_file}")
+        except json.JSONDecodeError:
+            self.logger.error(f"Error Invalid JSON content {self.config.patterns_file}")
+        except Exception as e:
+            self.logger.error(f"Unexpected error : {e}")
+        
+        self.seq_name = data.get('default', "sequence1")
+        
         self.queue.put(("CHG_SEQ",self.seq_name))
     
     def get_ip_address(self):

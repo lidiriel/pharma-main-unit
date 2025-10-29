@@ -27,38 +27,57 @@ class Programmation(object):
         self.logger.addHandler(fh)
         self.logger.info("Webservice Pharma started")
     
-    def load_sequences(self, fname="../config/cross.json"):
-        sequences = {}
+    def load_cross_config(self, fname="../config/cross.json"):
+        cross_config = {}
         try:
             config_file = open(fname, 'rb')
         except OSError:
             cherrypy.log(f"Could not open/read file:{fname}")
         with config_file:
-            sequences = json.load(config_file)
-        return sequences
+            cross_config = json.load(config_file)
+        return cross_config
     
-    def restart_service(self, service_name):
+    def control_service(self, service_name, cmd="restart"):
         try:
             # Redémarrer le service avec systemctl
-            subprocess.run(["systemctl", "restart", service_name], check=True)
+            subprocess.run(["systemctl", cmd, service_name], check=True)
             self.logger.info(f"Service {service_name} restarted.")
         except subprocess.CalledProcessError as e:
-            self.logger.error(f"Error on restart service {service_name} : {e}")
+            self.logger.error(f"Error on {cmd} for service {service_name} : {e}")
+            
+    def service_is_active(self, service_name):
+        """Return True if systemd service is running"""
+        try:
+            cmd = f'/bin/systemctl status {service_name}.service'
+            completed = subprocess.run( cmd, shell=True, check=True, stdout=subprocess.PIPE )
+        except subprocess.CalledProcessError as err:
+            print( 'ERROR:', err )
+        else:
+            for line in completed.stdout.decode('utf-8').splitlines():
+                if 'Active:' in line:
+                    if '(running)' in line:
+                        print('True')
+                        return True
+            return False
     
     @cherrypy.expose
     def index(self):
         return open('index.html')
 
+
+    def update_cherrypy_session(self):
+        if 'cross_config' not in cherrypy.session:
+            cross_config = self.load_cross_config(self.fname)
+            cherrypy.session['cross_config'] = cross_config
+        else:
+            cross_config = cherrypy.session['cross_config']
+        cherrypy.log(f"{cross_config}")
+        return cross_config
+
     @cherrypy.expose
     def save(self, sequence_name="", sequence_value=""):
         cherrypy.log(f" prog-list {sequence_name}  hex_list {sequence_value}")
-        all_sequences = {}
-        if 'sequences' not in cherrypy.session:
-            all_sequences = self.load_sequences(self.fname)
-            cherrypy.session['sequences'] = all_sequences
-        else:
-            all_sequences = cherrypy.session['sequences']
-        cherrypy.log(f"{all_sequences}")
+        cross_config = self.update_cherrypy_session()
         new_sequence = sequence_value.split(',')
         def convert(item):
             if item not in self.command_list:
@@ -69,33 +88,66 @@ class Programmation(object):
                     item = '0x0000'
             return item
         new_sequence = [convert(item) for item in new_sequence]
-        all_sequences[sequence_name] = new_sequence
-        cherrypy.session['sequences'] = all_sequences
+        cross_config['sequences'][sequence_name] = new_sequence
+        cherrypy.session['cross_config'] = cross_config
         cherrypy.log(f"new sequence {new_sequence}")
         try:
-            json_sequences = json.dumps(all_sequences)
+            json_cross_config = json.dumps(cross_config)
+            f = open(self.fname, "w")
+            f.write(json_cross_config)
+            f.close()
+        except OSError:
+            cherrypy.log(f"Could not open/read file:{self.fname}")
+        self.control_service(PHARMA_SERVICE)
+    
+    @cherrypy.expose     
+    def set_default(self, sequence_name=""):
+        cherrypy.log(f"set sequence {sequence_name} to default")
+        cross_config = self.update_cherrypy_session()
+        cross_config["default"] = sequence_name
+        try:
+            json_sequences = json.dumps(cross_config)
             f = open(self.fname, "w")
             f.write(json_sequences)
             f.close()
         except OSError:
-            cherrypy.log(f"Could not open/read file:{fname}")
-        self.restart_service(PHARMA_SERVICE)
+            cherrypy.log(f"Could not open/read file:{self.fname}")
+    
+    @cherrypy.expose
+    def service_start_stop(self):
+        cherrypy.log(f"start/stop pharma service")
+        if self.service_is_active(PHARMA_SERVICE):
+            cherrypy.log(f"pharma service is started -> stop")
+            self.control_service(PHARMA_SERVICE, "stop")
+        else:
+            cherrypy.log(f"pharma service is stoped -> start")
+            self.control_service(PHARMA_SERVICE, "start")
             
+    @cherrypy.tools.json_out()
+    @cherrypy.expose
+    def service_status(self):
+        cherrypy.log(f"status pharma service")
+        value = self.service_is_active(PHARMA_SERVICE)
+        return {"status" : value}
+
+    @cherrypy.tools.json_out()
+    @cherrypy.expose
+    def get_default_sequence_name(self):
+        cherrypy.log(f"get default sequence name")
+        cross_config = self.update_cherrypy_session()
+        value = cross_config['default']
+        return {"name" : value}
 
     
     @cherrypy.tools.json_out()
     @cherrypy.expose
     def load(self, sequence_name=""):
         out = ["0x0000"]
+        cross_config = self.update_cherrypy_session()
         if sequence_name == "":
-            all_sequences = self.load_sequences()
-            cherrypy.session['sequences'] = all_sequences
-            out =  all_sequences
+            out = cross_config['sequences']
         elif len(sequence_name) != 0:
-            if 'sequences' not in cherrypy.session:
-                all_sequences = self.load_sequences()
-                cherrypy.session['sequences'] = all_sequences
-            out = cherrypy.session['sequences'].get(sequence_name, ["0x0000"])
+            out = cross_config['sequences'].get(sequence_name, ["0x0000"])
             
         cherrypy.log(f"json out {out}")
         return out
@@ -109,19 +161,6 @@ if __name__ == '__main__':
             'tools.sessions.on': True,
             'tools.staticdir.root': os.path.abspath(os.getcwd())
         },
-
-        # '/save': {
-        #      'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-        #      'tools.response_headers.on': True,
-        #      'tools.response_headers.headers': [('Content-Type', 'text/plain')],
-        # },
-        #
-
-        # '/load': {
-        #     'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-        #     'tools.response_headers.on': True,
-        #     'tools.response_headers.headers': [('Content-Type', 'text/plain')],
-        # },
 
         '/static': {
             'tools.staticdir.on': True,

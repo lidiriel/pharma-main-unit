@@ -12,7 +12,7 @@ body {
 
 
 .row {
-  margin: 5px;
+  margin: 10px 5px;
 }
   
 .column {
@@ -99,7 +99,13 @@ body.blue-leds #rows-list .item.hover {
     position: relative;
     box-sizing: content-box;
     width: 130px;
-    height: 130px;
+    height: 120px;
+	margin-left: 10px;
+	background-color: #26477a;
+	border: solid 1px #547eae;
+	padding: 5px;
+	color: white;
+	font-weight: 700;
 }
 
 #update-button,
@@ -113,6 +119,24 @@ body.blue-leds #rows-list .item.hover {
     width: 95px;
     height: 30px;
     margin: 0 5px;
+}
+
+#seq_default {
+	width: 115px;
+	height: 30px;
+	margin: 0 5px;
+}
+#service_start_stop {
+	width: 115px;
+	height: 30px;
+	margin: 5px 5px;
+	font-weight: 700;
+}
+#default_sequence_name {
+	font-weight: 700;
+	background-color: #26477a;	
+	color: white;
+	padding: 5px;
 }
 
 #rotate-button,

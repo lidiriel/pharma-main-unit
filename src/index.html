@@ -14,12 +14,22 @@
 	<h3>Compost Collaps Pharma generator</h3>
 	<div class="row">
 		<div id="leds-container"></div>
+		<div id="shift-buttons-container">
+			<span>pharma.service</span>
+			<input type="button" id="service_start_stop" title="Start/Stop the service">
+			<button id="check-button" style="top: 10px; left: 90px;" title="Check status">
+				<span class="fa fa-redo"></span>
+			</button>
+		</div>
 	</div>
-	<div id="dialog-message-save" title="Sequence ?">
+	<div id="dialog-message" title="Title ?">
 	  <p>
 	    <span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 50px 0;"></span>
-	    Your sequence have successfully saved.
+	    <span id="message-text"></span>
 	  </p>
+	</div>
+	<div class="row">
+		<span title="you need to restart pharma service to playing it after change">default sequence : </span><span id="default_sequence_name"></span><p>You need to restart pharma service to playing it after change.</p>
 	</div>
 	<form action="#">
 		<fieldset>
@@ -28,6 +38,8 @@
 		  	</select>
 			<label for="hex_save">change, reorganize and</label>
 		  	<button id="hex_save">save it !</button>
+			<button id="seq_default">set default</button>
+			
 			<textarea id="hex_list" name="hex_list" rows="5" cols="50" readonly="readonly"></textarea>	
 		</fieldset>
 	</form>
