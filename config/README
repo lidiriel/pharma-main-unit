@@ -4,9 +4,9 @@ sudo systemctl enable webconfig.service
 sudo systemctl start webconfig.service 
 
 # install masterservice
-sudo cp pharma.service /lib/systemd/system/
-sudo systemctl enable pharma.service
-sudo systemctl start pharma.service 
+cp pharma.service ~/.config/systemd/user
+systemctl --user enable pharma.service
+systemctl --user start pharma.service
 
 # install shutdown service
 sudo cp shutdown-button.service /lib/systemd/system/
