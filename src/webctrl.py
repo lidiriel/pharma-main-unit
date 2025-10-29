@@ -21,9 +21,9 @@ class Programmation(object):
     def __init__(self, config):
         self.config = config
         self.logger = logging.getLogger()
-        self.logger.setLevel(logging.INFO)
-        fh = RotatingFileHandler(config.logFile, maxBytes=102400, backupCount=2)
-        fh.setLevel(logging.INFO)
+        self.logger.setLevel(logging.DEBUG)
+        fh = RotatingFileHandler(config.weblogFile, maxBytes=102400, backupCount=2)
+        fh.setLevel(logging.DEBUG)
         self.logger.addHandler(fh)
         self.logger.info("Webservice Pharma started")
     
@@ -40,24 +40,26 @@ class Programmation(object):
     def control_service(self, service_name, cmd="restart"):
         try:
             # Redémarrer le service avec systemctl
-            subprocess.run(["/bin/systemctl", "--user", cmd, service_name], check=True)
-            self.logger.info(f"Service {service_name} restarted.")
+            completed = subprocess.run(["/bin/systemctl", cmd, service_name], capture_output=True)
+            self.logger.debug(f"Service {service_name} CMD {cmd} completed={completed}")
         except subprocess.CalledProcessError as e:
             self.logger.error(f"Error on {cmd} for service {service_name} : {e}")
             
     def service_is_active(self, service_name):
         """Return True if systemd service is running"""
         try:
-            completed = subprocess.run(["/bin/systemctl", "--user", "status", service_name], shell=True, check=True, stdout=subprocess.PIPE )
+            completed = subprocess.run(["/bin/systemctl", "status", service_name], capture_output=True)
         except subprocess.CalledProcessError as err:
             self.logger.error( f"Error on service is active {err}" )
         else:
-            self.logger.debug(f"completed")
+            self.logger.debug(f"COMPLETED {completed}")
             for line in completed.stdout.decode('utf-8').splitlines():
                 if 'Active:' in line:
+                    self.logger.debug("Active line {line}")
                     if '(running)' in line:
-                        self.logger.debug('service is running')
+                        self.logger.debug(f"service {service_name} is running")
                         return True
+            self.logger.info(f"service {service_name} stopped")        
             return False
     
     @cherrypy.expose

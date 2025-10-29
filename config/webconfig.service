@@ -13,7 +13,6 @@ Restart=on-failure
 WorkingDirectory=/home/compost/pharma-main-unit/src/
 # affichage des log en temps reel dans journactl
 Environment=PYTHONUNBUFFERED=1
-User=compost
 
 [Install]
 WantedBy=default.target

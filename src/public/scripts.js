@@ -526,7 +526,9 @@ $(function () {
 			}).fail(function() {
 				  alert( "error please retry." );
 			});
-			serviceStatus();
+			setTimeout(function(){
+				serviceStatus();
+			}, 2000);
 	});
 	
 	$restartButton.click(function (event) {
