@@ -40,7 +40,7 @@ class Programmation(object):
     def control_service(self, service_name, cmd="restart"):
         try:
             # Redémarrer le service avec systemctl
-            subprocess.run(["systemctl", cmd, service_name], check=True)
+            subprocess.run(["/bin/systemctl", "--user", cmd, service_name], check=True)
             self.logger.info(f"Service {service_name} restarted.")
         except subprocess.CalledProcessError as e:
             self.logger.error(f"Error on {cmd} for service {service_name} : {e}")
@@ -48,8 +48,7 @@ class Programmation(object):
     def service_is_active(self, service_name):
         """Return True if systemd service is running"""
         try:
-            cmd = f'/bin/systemctl status {service_name}.service'
-            completed = subprocess.run( cmd, shell=True, check=True, stdout=subprocess.PIPE )
+            completed = subprocess.run(["/bin/systemctl", "--user", "status", service_name], shell=True, check=True, stdout=subprocess.PIPE )
         except subprocess.CalledProcessError as err:
             print( 'ERROR:', err )
         else:
