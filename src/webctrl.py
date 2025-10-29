@@ -123,6 +123,11 @@ class Programmation(object):
             cherrypy.log(f"pharma service is stoped -> start")
             self.control_service(PHARMA_SERVICE, "start")
             
+    @cherrypy.expose
+    def service_restart(self):
+        cherrypy.log(f"restart pharma service")
+        self.control_service(PHARMA_SERVICE, "restart")
+            
     @cherrypy.tools.json_out()
     @cherrypy.expose
     def service_status(self):

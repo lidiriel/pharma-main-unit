@@ -13,6 +13,7 @@ $(function () {
 	var $saveButton = $('#hex_save');
 	var $defaultButton = $('#seq_default');
 	var $startStopButton = $('#service_start_stop');
+	var $restartButton = $('#service_restart');
 	var $dialogMessage = $('#dialog-message');
 	var $checkButton = $('#check-button');
 	var $defaultSequenceName = $('#default_sequence_name');
@@ -506,12 +507,12 @@ $(function () {
 		event.preventDefault();
 		var sequence_name = $progSelect.val();
 		var posting = $.post("/set_default", {"sequence_name" : sequence_name});
-			posting.done(function(data) {
-				console.log("seq sended to main process", sequence_name);
-				myDialog(sequence_name, "Your sequence has set to default.");
-			}).fail(function() {
-			    alert( "error please retry." );
-			})
+		posting.done(function(data) {
+			console.log("seq sended to pharma process", sequence_name);
+			myDialog(sequence_name, "Your sequence has set to default.");
+		}).fail(function() {
+		    alert( "error please retry." );
+		})
 		getDefaultSequenceName();
 	});
 	
@@ -519,13 +520,25 @@ $(function () {
 	$startStopButton.click(function (event) {
 			event.preventDefault();
 			var posting = $.post("/service_start_stop");
-				posting.done(function(data) {
-					console.log("start/stop main process");
-					myDialog("start/stop", "main service status has changed (start/stop).");
+			posting.done(function(data) {
+				console.log("start/stop pharma process");
+				myDialog("start/stop", "pharma service status has changed (start/stop).");
 			}).fail(function() {
-				   alert( "error please retry." );
+				  alert( "error please retry." );
 			});
 			serviceStatus();
+	});
+	
+	$restartButton.click(function (event) {
+		event.preventDefault();
+		var posting = $.post("/service_restart");
+		posting.done(function(data) {
+			console.log("restart pharma process");
+			myDialog("restart", "pharma service is restarted.");
+		}).fail(function() {
+			alert( "error please retry." );
+		});
+		serviceStatus();
 	});
 	
 	$checkButton.click(function (event) {

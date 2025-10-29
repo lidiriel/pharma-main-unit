@@ -98,12 +98,12 @@ body.blue-leds #rows-list .item.hover {
     display: inline-block;
     position: relative;
     box-sizing: content-box;
-    width: 130px;
+    width: 170px;
     height: 120px;
 	margin-left: 10px;
 	background-color: #26477a;
 	border: solid 1px #547eae;
-	padding: 5px;
+	padding: 5px 0 0 20px;
 	color: white;
 	font-weight: 700;
 }
@@ -126,10 +126,11 @@ body.blue-leds #rows-list .item.hover {
 	height: 30px;
 	margin: 0 5px;
 }
-#service_start_stop {
+#service_start_stop,
+#service_restart {
 	width: 115px;
 	height: 30px;
-	margin: 5px 5px;
+	margin: 7px 0 0 10px;
 	font-weight: 700;
 }
 #default_sequence_name {
