@@ -50,12 +50,13 @@ class Programmation(object):
         try:
             completed = subprocess.run(["/bin/systemctl", "--user", "status", service_name], shell=True, check=True, stdout=subprocess.PIPE )
         except subprocess.CalledProcessError as err:
-            print( 'ERROR:', err )
+            self.logger.error( f"Error on service is active {err}" )
         else:
+            self.logger.debug(f"completed")
             for line in completed.stdout.decode('utf-8').splitlines():
                 if 'Active:' in line:
                     if '(running)' in line:
-                        print('True')
+                        self.logger.debug('service is running')
                         return True
             return False
     
