@@ -8,17 +8,13 @@ import subprocess
 import logging
 import Config
 from logging.handlers import RotatingFileHandler
+from setuptools.dist import sequence
 
-""" for restarting service after config update
-    wee need the name PHARMA_SERVICE
-"""
-PHARMA_SERVICE = "pharma"
-
-class Programmation(object):
+class Webctrl(object):
     fname="../config/cross.json"
     command_list = ['RAND']
     
-    def __init__(self, config):
+    def __init__(self, config, interface_processor=None):
         self.config = config
         self.logger = logging.getLogger()
         self.logger.setLevel(logging.DEBUG)
@@ -26,6 +22,12 @@ class Programmation(object):
         fh.setLevel(logging.DEBUG)
         self.logger.addHandler(fh)
         self.logger.info("Webservice Pharma started")
+        
+    def set_interface_processor(self, interface_processor):
+        self.interface_processor = interface_processor
+        
+    def set_beat_detector(self, beat_detector):
+        self.beat_detector = beat_detector
     
     def load_cross_config(self, fname="../config/cross.json"):
         cross_config = {}
@@ -37,30 +39,6 @@ class Programmation(object):
             cross_config = json.load(config_file)
         return cross_config
     
-    def control_service(self, service_name, cmd="restart"):
-        try:
-            # Redémarrer le service avec systemctl
-            completed = subprocess.run(["/bin/systemctl", cmd, service_name], capture_output=True)
-            self.logger.debug(f"Service {service_name} CMD {cmd} completed={completed}")
-        except subprocess.CalledProcessError as e:
-            self.logger.error(f"Error on {cmd} for service {service_name} : {e}")
-            
-    def service_is_active(self, service_name):
-        """Return True if systemd service is running"""
-        try:
-            completed = subprocess.run(["/bin/systemctl", "status", service_name], capture_output=True)
-        except subprocess.CalledProcessError as err:
-            self.logger.error( f"Error on service is active {err}" )
-        else:
-            self.logger.debug(f"COMPLETED {completed}")
-            for line in completed.stdout.decode('utf-8').splitlines():
-                if 'Active:' in line:
-                    self.logger.debug("Active line {line}")
-                    if '(running)' in line:
-                        self.logger.debug(f"service {service_name} is running")
-                        return True
-            self.logger.info(f"service {service_name} stopped")        
-            return False
     
     @cherrypy.expose
     def index(self):
@@ -100,7 +78,16 @@ class Programmation(object):
             f.close()
         except OSError:
             cherrypy.log(f"Could not open/read file:{self.fname}")
-        self.control_service(PHARMA_SERVICE)
+    
+    @cherrypy.tools.json_out()
+    @cherrypy.expose
+    def get_playing(self):
+        value = self.interface_processor.get_playing_sequence()
+        return {"name" : value}
+    
+    @cherrypy.expose
+    def set_playing(self, sequence_name=""):
+        self.interface_processor.set_playing_sequence(sequence_name)
     
     @cherrypy.expose     
     def set_default(self, sequence_name=""):
@@ -117,32 +104,35 @@ class Programmation(object):
     
     @cherrypy.expose
     def service_start_stop(self):
-        cherrypy.log(f"start/stop pharma service")
-        if self.service_is_active(PHARMA_SERVICE):
-            cherrypy.log(f"pharma service is started -> stop")
-            self.control_service(PHARMA_SERVICE, "stop")
+        cherrypy.log(f"start/stop beatdetector thread")
+        if self.beat_detector.is_alive():
+            cherrypy.log(f"beat detector thread is started -> stop")
+            self.beat_detector.stop()
         else:
-            cherrypy.log(f"pharma service is stoped -> start")
-            self.control_service(PHARMA_SERVICE, "start")
+            cherrypy.log(f"beat detector thread is stoped -> start")
+            self.beat_detector.start()
             
     @cherrypy.expose
     def service_restart(self):
-        cherrypy.log(f"restart pharma service")
-        self.control_service(PHARMA_SERVICE, "restart")
+        cherrypy.log(f"restart pharma threads")
+        self.beat_detector.stop()
+        self.interface_processor.stop()
+        self.interface_processor.start()
+        self.beat_detector.start()
             
     @cherrypy.tools.json_out()
     @cherrypy.expose
     def service_status(self):
-        cherrypy.log(f"status pharma service")
-        value = self.service_is_active(PHARMA_SERVICE)
+        value = self.beat_detector.is_alive()
+        cherrypy.log(f"Is beat_detector thread alive ? {value}")
         return {"status" : value}
 
     @cherrypy.tools.json_out()
     @cherrypy.expose
     def get_default_sequence_name(self):
-        cherrypy.log(f"get default sequence name")
         cross_config = self.update_cherrypy_session()
         value = cross_config['default']
+        cherrypy.log(f"get default sequence name {value}")
         return {"name" : value}
 
     
@@ -175,6 +165,6 @@ if __name__ == '__main__':
         }
     }
     config = Config.Config()
-    webapp = Programmation(config)
+    webapp = Webctrl(config)
     cherrypy.server.socket_host = '0.0.0.0'
     cherrypy.quickstart(webapp, '/', conf)

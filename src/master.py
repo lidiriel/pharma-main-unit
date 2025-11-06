@@ -4,8 +4,12 @@ import Config
 import CommandProcessor
 import InterfaceProcessor
 import BeatDetector
+import webctrl
 import Pins
+import cherrypy
+import os
 from logging.handlers import RotatingFileHandler
+
 
 if __name__ == "__main__":
     config = Config.Config()
@@ -44,4 +48,19 @@ if __name__ == "__main__":
     cp.start()
     logger.info('CommandProcessor started')
     
+    # start webservice
+    conf = {
+        '/': {
+            'tools.sessions.on': True,
+            'tools.staticdir.root': os.path.abspath(os.getcwd())
+        },
+
+        '/static': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': './public'
+        }
+    }
+    webapp = webctrl.Webctrl(config, ip)
+    cherrypy.server.socket_host = '0.0.0.0'
+    cherrypy.quickstart(webapp, '/', conf)
    

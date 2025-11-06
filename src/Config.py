@@ -1,5 +1,9 @@
 """ In production do not use debug mode
 """
+import re
+
+SEQUENCE_PATTERN = re.compile('sequence[\d]')
+
 class Config(object):
     def __init__(self):
         self.logFile = '/tmp/pharma.log'
@@ -16,3 +20,5 @@ class Config(object):
         self.com_debug = False
         self.com_serial_port = '/dev/ttyAMA0'
         self.com_serial_baudrate = 57600
+        
+

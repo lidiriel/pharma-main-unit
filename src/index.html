@@ -15,10 +15,6 @@
 	<div class="row">
 		<div id="leds-container"></div>
 		<div id="shift-buttons-container">
-			<span>pharma.service
-			<button id="check-button" style="top: 10px; left: 90px;" title="Check status">
-				<span class="fa fa-redo"></span>
-			</button></span>
 			<input type="button" id="service_start_stop" title="Start/Stop the service">
 			<input type="button" id="service_restart" title="Restart the service" value="RESTART">
 		</div>
@@ -30,13 +26,13 @@
 	  </p>
 	</div>
 	<div class="row">
-		<span title="you need to restart pharma service to playing it after change">default sequence : </span><span id="default_sequence_name"></span><p>You need to restart pharma service to playing it after change.</p>
+		<span title="">default sequence : </span><span id="default_sequence_name"></span><p>Default sequence playing at the startup.</p>
+		<span> Now playing :</span><select name="seq_list" id="seq_list"></select>
 	</div>
 	<form action="#">
 		<fieldset>
 			<label for="prog_list">Select a programmation</label>
-		  	<select name="prog_list" id="prog_list">
-		  	</select>
+		  	<select name="prog_list" id="prog_list"></select>
 			<label for="hex_save">change, reorganize and</label>
 		  	<button id="hex_save">save it !</button>
 			<button id="seq_default">set default</button>

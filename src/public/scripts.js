@@ -10,6 +10,7 @@ $(function () {
     var $updateButton = $('#update-button');
 	var $deleteallButton = $('#deleteall-button');
 	var $progSelect = $('#prog_list');
+	var $seqSelect = $('#seq_list');
 	var $saveButton = $('#hex_save');
 	var $defaultButton = $('#seq_default');
 	var $startStopButton = $('#service_start_stop');
@@ -329,12 +330,15 @@ $(function () {
     }
 
 	function loadAllSequences() {
+		// load all sequences in the list for update pattern and for playing
 		var posting = $.post("/load", {"sequence_name" : ""});
 		posting.done(function(data) {
 			for(seq_name in data){
 				$progSelect.append(new Option(seq_name, seq_name));
+				$seqSelect.append(new Option(seq_name, seq_name));
 			}
 			$progSelect.show();
+			$seqSelect.show();
 			var key = $progSelect.val();
 			$hexList.val(data[key]);
 			var optionSelected = $progSelect.val();
@@ -385,6 +389,21 @@ $(function () {
 			hexInputToLeds();
 		});
 		
+	}
+	
+	function playingSequence(name) {
+		console.log("playing sequence name = ", name);
+		var posting = $.post("/set_playing", {"sequence_name" : name});
+	}
+	
+	function getPlayingSequence(){
+		var posting = $.post("/get_playing");
+		posting.done(function(data) {
+		if(data["name"]){
+			$seqSelect.val(data["name"]);
+		}else{
+			console.error("in getPlayingSequence invalid data");
+		}
 	}
 
     function getInputHexValue() {
@@ -554,6 +573,14 @@ $(function () {
 			loadOneSequence(optionSelected);
 		});
 	} );
+	
+	$( function() {
+		$seqSelect.change( function (e) {
+			var optionSelected = $seqSelect.val();
+			playingSequence(optionSelected);
+		});
+	} );
+	
 
     $frames.sortable({
         stop: function (event, ui) {
@@ -566,5 +593,6 @@ $(function () {
 	loadAllSequences();
 	serviceStatus();
 	getDefaultSequenceName();
+	getplayingSequence();
 
 });

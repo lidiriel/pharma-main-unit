@@ -8,11 +8,14 @@ import RPi.GPIO as GPIO
 import time
 import I2C_LCD_driver
 import json
+from Config import SEQUENCE_PATTERN
+
 
 
 class InterfaceProcessor(threading.Thread):
     def __init__(self, config, queue):
         super().__init__()
+        self.status = "PLAYING"
         self.config = config
         self.queue = queue
         self.logger = logging.getLogger('InterfaceProcessor')
@@ -38,9 +41,20 @@ class InterfaceProcessor(threading.Thread):
         except Exception as e:
             self.logger.error(f"Unexpected error : {e}")
         
-        self.seq_name = data.get('default', "sequence1")
+        self.set_playing_sequence(data.get('default', "sequence1"))
         
-        self.queue.put(("CHG_SEQ",self.seq_name))
+        
+    def get_playing_sequence(self):
+        return self.seq_name
+        
+    def set_playing_sequence(self, value):
+        """ value is only <sequenceX> where X [0..9]
+        """
+        if SEQUENCE_PATTERN.match(value):
+            self.seq_name = value
+            self.queue.put(("CHG_SEQ",self.seq_name))
+        else:
+            self.logger.error(f"Invalid sequence {value}")
     
     def get_ip_address(self):
         """ if connected to network : dyanmic ip
@@ -89,7 +103,7 @@ class InterfaceProcessor(threading.Thread):
                 time.sleep(3)
                 self.lcd.lcd_clear()
                 self.lcd.lcd_display_string(f"IP {self.myip}", 1)
-                self.lcd.lcd_display_string(f"PLAY {self.seq_name}", 2)
+                self.lcd.lcd_display_string(f"{self.status} {self.seq_name}", 2)
             time.sleep(3)
             
             
