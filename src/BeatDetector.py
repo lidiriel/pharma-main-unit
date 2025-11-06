@@ -7,7 +7,7 @@ import numpy as np
 import json
 from collections import deque
 from Pins import PINS
-import RPi.GPIO as GPIO
+import lgpio
 from threading import Thread
 
 """ I2S ADC parameters
@@ -23,10 +23,12 @@ ENERGY_HISTORY = 42
 REGISTER_LED = 0
 SEQ_NAME = "sequence1"
 
+gpio_handler = lgpio.gpiochip_open(0)
+
 def visual_beat():
-    GPIO.output(PINS['BEAT'], GPIO.HIGH)
+    lgpio.gpio_write(gpio_handler, PINS['BEAT'], 1) 
     time.sleep(0.02)
-    GPIO.output(PINS['BEAT'], GPIO.LOW)
+    lgpio.gpio_write(gpio_handler, PINS['BEAT'], 0)
 
 class BeatDetector(threading.Thread):
     def __init__(self, config, queue):
