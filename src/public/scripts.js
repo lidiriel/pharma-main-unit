@@ -355,10 +355,10 @@ $(function() {
         posting.done(function(data) {
             if (data["status"]) {
                 $startStopButton.css('color', 'green');
-                $startStopButton.prop("value", 'STOP');
+                $startStopButton.prop("value", 'PAUSE');
             } else {
                 $startStopButton.css('color', 'red');
-                $startStopButton.prop("value", 'START');
+                $startStopButton.prop("value", 'PLAY');
             }
         });
     }

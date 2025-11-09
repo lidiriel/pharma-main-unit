@@ -122,8 +122,8 @@ class Webctrl(object):
     @cherrypy.tools.json_out()
     @cherrypy.expose
     def service_status(self):
-        value = self.beat_detector.is_alive()
-        cherrypy.log(f"Is beat_detector thread alive ? {value}")
+        value = self.command_processor.is_running()
+        cherrypy.log(f"Is command processor is running ? {value}")
         return {"status" : value}
 
     @cherrypy.tools.json_out()
