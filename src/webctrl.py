@@ -27,6 +27,9 @@ class Webctrl(object):
         
     def set_beat_detector(self, beat_detector):
         self.beat_detector = beat_detector
+        
+    def set_command_processor(self, command_processor):
+        self.command_processor = command_processor
     
     def load_cross_config(self, fname="../config/cross.json"):
         cross_config = {}
@@ -104,22 +107,17 @@ class Webctrl(object):
     @cherrypy.expose
     def service_start_stop(self):
         cherrypy.log(f"start/stop beatdetector thread")
-        if self.beat_detector.is_alive():
-            cherrypy.log(f"beat detector thread is started -> stop")
-            self.beat_detector.terminate()
+        if self.command_processor.is_running():
+            cherrypy.log(f"command processor is running -> pause")
+            self.command_processor.pause()
         else:
-            cherrypy.log(f"beat detector thread is stoped -> start")
-            self.beat_detector.start()
+            cherrypy.log(f"command processor is not running -> playing")
+            self.command_processor.playing()
             
     @cherrypy.expose
     def service_restart(self):
-        cherrypy.log(f"restart pharma threads")
-        self.beat_detector.terminate()
-        self.interface_processor.terminate()
-        self.beat_detector.join()
-        self.interface_processor.join()
-        self.interface_processor.start()
-        self.beat_detector.start()
+        cherrypy.log(f"restart pharma thread")
+        # TODO
             
     @cherrypy.tools.json_out()
     @cherrypy.expose

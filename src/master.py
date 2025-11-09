@@ -63,6 +63,7 @@ if __name__ == "__main__":
     webapp = webctrl.Webctrl(config)
     webapp.set_interface_processor(ip)
     webapp.set_beat_detector(bd)
+    webapp.set_command_processor(cp)
     cherrypy.server.socket_host = '0.0.0.0'
     cherrypy.quickstart(webapp, '/', conf)
    

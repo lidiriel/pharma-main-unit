@@ -13,12 +13,22 @@ class CommandProcessor(threading.Thread):
         self.config = config
         self.queue = queue
         self.logger = logging.getLogger('Communication')
+        self._running = True
         if self.config.com_debug:
             self.logger.setLevel(logging.DEBUG)
         else:
             self.logger.setLevel(logging.ERROR)
 
         self.com_serial = serial.Serial(self.config.com_serial_port, baudrate=self.config.com_serial_baudrate)
+
+    def pause(self):
+        self._running = False
+        
+    def playing(self):
+        self._running = True
+        
+    def is_running(self):
+        return self._running
 
     def crc8(self, data: bytes) -> int:
         crc = 0x00
@@ -59,7 +69,9 @@ class CommandProcessor(threading.Thread):
             (cmd, value) = self.queue.get(block=True)
             try:
                 self.logger.info(f"{cmd} {value}")
-                if cmd == "BEAT":
+                if not self._running:
+                    continue
+                elif cmd == "BEAT":
                     element = self.sequence[self.sequence_idx]
                     code = 0
                     if element == "RAND":
