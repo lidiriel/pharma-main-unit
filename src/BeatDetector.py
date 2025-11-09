@@ -44,6 +44,10 @@ class BeatDetector(threading.Thread):
         self.logger = logging.getLogger('BeatDetector')
         self.logger.setLevel(logging.DEBUG)
         self.clk_id = time.CLOCK_REALTIME
+        self._running = True
+        
+    def terminate(self):
+        self._running = False
         
     
     def find_input_device(self, name="Loopback"):
@@ -135,7 +139,7 @@ class BeatDetector(threading.Thread):
 
         prev_beat = perf_counter()
         beats_empty = [0]*N_BANDS
-        while True:
+        while self._running:
             beats_detected = beats_empty
             data = stream.read(CHUNK, exception_on_overflow=False)
             samples = np.frombuffer(data, dtype=np.int32).astype(np.float32)

@@ -106,7 +106,7 @@ class Webctrl(object):
         cherrypy.log(f"start/stop beatdetector thread")
         if self.beat_detector.is_alive():
             cherrypy.log(f"beat detector thread is started -> stop")
-            self.beat_detector.stop()
+            self.beat_detector.terminate()
         else:
             cherrypy.log(f"beat detector thread is stoped -> start")
             self.beat_detector.start()
@@ -114,8 +114,10 @@ class Webctrl(object):
     @cherrypy.expose
     def service_restart(self):
         cherrypy.log(f"restart pharma threads")
-        self.beat_detector.stop()
-        self.interface_processor.stop()
+        self.beat_detector.terminate()
+        self.interface_processor.terminate()
+        self.beat_detector.join()
+        self.interface_processor.join()
         self.interface_processor.start()
         self.beat_detector.start()
             

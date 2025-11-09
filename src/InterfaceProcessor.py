@@ -46,7 +46,10 @@ class InterfaceProcessor(threading.Thread):
             self.logger.error(f"Unexpected error : {e}")
         
         self.set_playing_sequence(data.get('default', "sequence1"))
-        
+        self._running = True
+    
+    def terminate(self):
+        self._running = False 
         
     def get_playing_sequence(self):
         return self.seq_name
@@ -101,7 +104,7 @@ class InterfaceProcessor(threading.Thread):
         except Exception as e:
             self.logger.error(f"ERROR to start pwm heart led : {e}")
              
-        while True:
+        while self._running:
             if self.lcd_status:
                 self.lcd.lcd_clear()
                 self.lcd.lcd_display_string(u"Compost Collaps", 1)
