@@ -8,7 +8,6 @@ import subprocess
 import logging
 import Config
 from logging.handlers import RotatingFileHandler
-from setuptools.dist import sequence
 
 class Webctrl(object):
     fname="../config/cross.json"

@@ -2,7 +2,7 @@
 """
 import re
 
-SEQUENCE_PATTERN = re.compile('sequence[\d]')
+SEQUENCE_PATTERN = re.compile(r'sequence\d')
 
 class Config(object):
     def __init__(self):

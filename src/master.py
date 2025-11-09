@@ -27,7 +27,7 @@ if __name__ == "__main__":
     #logger.addHandler(ch)
     
     # init pin to output
-    Pins.pinsInit()
+    gpiochip = Pins.pinsInit()
     
     """ queue use tuple (CMD, VALUE)
         CMD are : 
@@ -36,11 +36,11 @@ if __name__ == "__main__":
     """
     queue = queue.Queue()
         
-    ip = InterfaceProcessor.InterfaceProcessor(config, queue)
+    ip = InterfaceProcessor.InterfaceProcessor(config, queue, gpiochip)
     ip.start()
     logger.info('InterfaceProcessor started')
    
-    bd = BeatDetector.BeatDetector(config, queue)
+    bd = BeatDetector.BeatDetector(config, queue, gpiochip)
     bd.start()
     logger.info('BeatDetector started')
 
@@ -60,7 +60,9 @@ if __name__ == "__main__":
             'tools.staticdir.dir': './public'
         }
     }
-    webapp = webctrl.Webctrl(config, ip)
+    webapp = webctrl.Webctrl(config)
+    webapp.set_interface_processor(ip)
+    webapp.set_beat_detector(bd)
     cherrypy.server.socket_host = '0.0.0.0'
     cherrypy.quickstart(webapp, '/', conf)
    

@@ -7,8 +7,9 @@ import numpy as np
 import json
 from collections import deque
 from Pins import PINS
-import lgpio
 from threading import Thread
+import lgpio
+#import RPi.GPIO as GPIO
 
 """ I2S ADC parameters
     Algo parameters
@@ -23,18 +24,22 @@ ENERGY_HISTORY = 42
 REGISTER_LED = 0
 SEQ_NAME = "sequence1"
 
-gpio_handler = lgpio.gpiochip_open(0)
+#gpio_handler = lgpio.gpiochip_open(0)
 
-def visual_beat():
+def visual_beat(gpio_handler):
+    #GPIO.output(PINS['BEAT'], GPIO.HIGH)
     lgpio.gpio_write(gpio_handler, PINS['BEAT'], 1) 
     time.sleep(0.02)
+    #GPIO.output(PINS['BEAT'], GPIO.LOW)
     lgpio.gpio_write(gpio_handler, PINS['BEAT'], 0)
 
+
 class BeatDetector(threading.Thread):
-    def __init__(self, config, queue):
+    def __init__(self, config, queue, gpiochip=None):
         super().__init__()
         self.config = config
         self.queue = queue
+        self.gpiochip=gpiochip
         self.pa = pyaudio.PyAudio()
         self.logger = logging.getLogger('BeatDetector')
         self.logger.setLevel(logging.DEBUG)
@@ -161,7 +166,7 @@ class BeatDetector(threading.Thread):
                     # interval between two beat in seconds (example 180BPM = 0.33s)
                     self.queue.put(("BEAT",curr_time))
                     prev_beat = curr_time
-                    Thread(target=visual_beat).start()
+                    Thread(target=visual_beat, args=(self.gpiochip,)).start()
                     
                                                                                 
             if self.config.beat_debug:

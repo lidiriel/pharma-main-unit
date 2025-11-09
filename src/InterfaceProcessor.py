@@ -4,7 +4,8 @@ import socket
 import fcntl
 import struct
 from Pins import PINS
-import RPi.GPIO as GPIO
+import lgpio as sbc
+#import RPi.GPIO as GPIO
 import time
 import I2C_LCD_driver
 import json
@@ -13,15 +14,18 @@ from Config import SEQUENCE_PATTERN
 
 
 class InterfaceProcessor(threading.Thread):
-    def __init__(self, config, queue):
+    def __init__(self, config, queue, gpiochip=None):
         super().__init__()
-        self.status = "PLAYING"
+        self.status = "PLAY"
         self.config = config
         self.queue = queue
+        self.gpiochip = gpiochip
         self.logger = logging.getLogger('InterfaceProcessor')
+
         # Create PWM object on GPIO12 with frequency 1 Hz
         # Pin init is doing into master.py
-        self.pwm = GPIO.PWM(PINS['HEART'], 0.5)
+        #sbc.gpio_claim_output(gpiochip, gpio=PINS['HEART'], level=0)
+
         self.lcd_status = False
         try:
             self.lcd = I2C_LCD_driver.lcd()
@@ -92,7 +96,8 @@ class InterfaceProcessor(threading.Thread):
     def run(self):
         self.myip = self.get_ip("eth0")
         try:
-            self.pwm.start(50)  # Start duty cycle 50% for heartbeat
+            # self.pwm.start(50)  # Start duty cycle 50% for heartbeat
+            sbc.tx_pwm(self.gpiochip, PINS['HEART'], 1, 50)
         except Exception as e:
             self.logger.error(f"ERROR to start pwm heart led : {e}")
              

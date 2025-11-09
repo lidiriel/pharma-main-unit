@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-import lgpio
+# now we use lgpio but with the old interface RPi.GPIO
+import RPi.GPIO as GPIO
 import time
 import os
+import sys
 
 BUTTON_GPIO = 4  # GPIO4 (pin 7)
 """ Shutdown button , connectect switch to GPIO4 and GND
@@ -11,10 +13,9 @@ def shutdown(channel):
     print("Shutdown button pressed")
     os.system("sudo shutdown -h now")
 
-handler = lgpio.gpiochip_open(0)
-lgpio.gpio_claim_input(handler, BUTTON_GPIO)
-
-lgpio.callback(0, BUTTON_GPIO, lgpio.BOTH_EDGES, shutdown)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(BUTTON_GPIO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.add_event_detect(BUTTON_GPIO, GPIO.FALLING, callback=shutdown, bouncetime=2000)
 
 try:
     print("Waiting for shutdown button press...")
@@ -22,4 +23,4 @@ try:
         time.sleep(1)
 except KeyboardInterrupt:
     pass
-lgpio.gpiochip_close(handler)
+GPIO.cleanup()

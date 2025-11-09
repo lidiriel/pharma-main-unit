@@ -1,4 +1,5 @@
-import lgpio
+#import RPi.GPIO as GPIO
+import lgpio as sbc
 """ 
     Reserved GPIO
     GPIO 2    I2C SDA
@@ -18,8 +19,10 @@ PINS = {
 
 
 def pinsInit():
-    handler = lgpio.gpiochip_open(0)
+    gpiochip = sbc.gpiochip_open(0)
+    # GPIO.setmode(GPIO.BCM)
     for pin in PINS.values():
-        lgpio.gpio_claim_output(handler, pin)
-
+    #     GPIO.setup(pin, GPIO.OUT)
+        sbc.gpio_claim_output(gpiochip, pin, level=0)
+    return gpiochip
 
