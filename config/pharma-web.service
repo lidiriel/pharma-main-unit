@@ -1,20 +1,21 @@
 [Unit]
-Description="Web config for pharma"
+Description="Web interface process for pharma"
 Wants=network.target
-After=default.target
-
+# start after pharma for inter process communication with socket
+After=pharma.service
 
 [Service]
 Type=simple
+User=compost
 GuessMainPID=yes
 ExecStart=python webctrl.py
 ExecStop=kill -SIGINT $mainpid
 Restart=on-failure
 WorkingDirectory=/home/compost/pharma-main-unit/src/
-# affichage des log en temps reel dans journactl
+# view real time log in journactl
 Environment=PYTHONUNBUFFERED=1
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target
 
 

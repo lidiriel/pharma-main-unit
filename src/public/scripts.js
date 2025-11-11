@@ -350,15 +350,15 @@ $(function() {
         });
     }
 
-    function serviceStatus() {
-        var posting = $.post("/service_status");
+    function communicationStatus() {
+        var posting = $.post("/communication_status");
         posting.done(function(data) {
             if (data["status"]) {
                 $startStopButton.css('color', 'green');
-                $startStopButton.prop("value", 'STOP');
+                $startStopButton.prop("value", 'Now playing, click to pause');
             } else {
                 $startStopButton.css('color', 'red');
-                $startStopButton.prop("value", 'START');
+                $startStopButton.prop("value", 'Stoped, click to play');
             }
         });
     }
@@ -552,15 +552,15 @@ $(function() {
     // start / stop service button
     $startStopButton.click(function(event) {
         event.preventDefault();
-        var posting = $.post("/service_start_stop");
+        var posting = $.post("/communication_change");
         posting.done(function(data) {
-            console.log("start/stop pharma process");
-            myDialog("start/stop", "pharma service status has changed (start/stop).");
+            console.log("communication change (pause, play)");
+            myDialog("pause/play", "Communication with cross change.");
         }).fail(function() {
             alert("error please retry.");
         });
         setTimeout(function() {
-            serviceStatus();
+            communicationStatus();
         }, 2000);
     });
 
@@ -573,11 +573,11 @@ $(function() {
         }).fail(function() {
             alert("error please retry.");
         });
-        serviceStatus();
+        communicationStatus();
     });
 
     $checkButton.click(function(event) {
-        serviceStatus();
+        communicationStatus();
     });
 
     $(function() {
@@ -604,7 +604,7 @@ $(function() {
     $dialogMessage.hide();
 
     loadAllSequences();
-    serviceStatus();
+    communicationStatus();
     getDefaultSequenceName();
     getPlayingSequence();
 

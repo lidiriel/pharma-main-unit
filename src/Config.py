@@ -1,6 +1,7 @@
 """ In production do not use debug mode
 """
 import re
+from enum import StrEnum
 
 SEQUENCE_PATTERN = re.compile(r'sequence\d')
 
@@ -20,5 +21,17 @@ class Config(object):
         self.com_debug = False
         self.com_serial_port = '/dev/ttyAMA0'
         self.com_serial_baudrate = 57600
+        self.sock_file = '/tmp/pharma-ipc.socket'
+        self.service_name = 'pharma.service'
+        
+
+class IPC_COMMAND(StrEnum):
+    GET_PAYING = 'get_playing'
+    SET_PLAYING = 'set_playing'
+    IS_PLAYING = 'is_playing'
+    DO_PAUSE = 'do_pause'
+    DO_PLAY = 'do_play'
+    
+    
         
 
