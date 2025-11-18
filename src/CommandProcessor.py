@@ -4,21 +4,23 @@ import logging
 import json
 import random
 import serial
+from Pins import PINS
+import lgpio as sbc
 
 REGISTER_LED = 0
 
 class CommandProcessor(threading.Thread):
-    def __init__(self, config, queue):
+    def __init__(self, config, queue, gpiochip = None):
         super().__init__()
         self.config = config
         self.queue = queue
-        self.logger = logging.getLogger('Communication')
+        self.logger = logging.getLogger('CommandProcessor')
         self._running = True
         if self.config.com_debug:
             self.logger.setLevel(logging.DEBUG)
         else:
             self.logger.setLevel(logging.ERROR)
-
+        sbc.gpio_write(gpiochip, PINS['RS485_DE'], 1)
         self.com_serial = serial.Serial(self.config.com_serial_port, baudrate=self.config.com_serial_baudrate)
 
     def pause(self):
@@ -42,10 +44,13 @@ class CommandProcessor(threading.Thread):
         return crc
     
     def send_data(self, data1, data2):
-        payload = bytes([data1, data2])
-        crc = self.crc8(payload)
-        frame = bytes([0xAA]) + payload + bytes([crc, 0x55])
-        self.com_serial.write(frame)
+        try:
+            payload = bytes([data1, data2])
+            crc = self.crc8(payload)
+            frame = bytes([0xAA]) + payload + bytes([crc, 0x55])
+            self.com_serial.write(frame)
+        except Exception as e:
+            self.logger.error(f"error on send_data {e}")
 
     def run(self):
         data = None
@@ -70,6 +75,7 @@ class CommandProcessor(threading.Thread):
             try:
                 self.logger.info(f"{cmd} {value}")
                 if not self._running:
+                    time.sleep(1)
                     continue
                 elif cmd == "BEAT":
                     element = self.sequence[self.sequence_idx]

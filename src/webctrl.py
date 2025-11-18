@@ -10,7 +10,7 @@ import Config
 from logging.handlers import RotatingFileHandler
 
 class Webctrl(object):
-    fname="../config/cross.json"
+    #fname="../config/cross.json"
     command_list = ['RAND']
     
     def __init__(self, config, interface_processor=None):
@@ -49,7 +49,7 @@ class Webctrl(object):
 
     def update_cherrypy_session(self):
         if 'cross_config' not in cherrypy.session:
-            cross_config = self.load_cross_config(self.fname)
+            cross_config = self.load_cross_config(self.config.patterns_file)
             cherrypy.session['cross_config'] = cross_config
         else:
             cross_config = cherrypy.session['cross_config']
@@ -75,11 +75,11 @@ class Webctrl(object):
         cherrypy.log(f"new sequence {new_sequence}")
         try:
             json_cross_config = json.dumps(cross_config)
-            f = open(self.fname, "w")
+            f = open(self.config.patterns_file, "w")
             f.write(json_cross_config)
             f.close()
         except OSError:
-            cherrypy.log(f"Could not open/read file:{self.fname}")
+            cherrypy.log(f"Could not open/read file:{self.config.patterns_file}")
     
     @cherrypy.tools.json_out()
     @cherrypy.expose
@@ -98,11 +98,11 @@ class Webctrl(object):
         cross_config["default"] = sequence_name
         try:
             json_sequences = json.dumps(cross_config)
-            f = open(self.fname, "w")
+            f = open(self.config.patterns_file, "w")
             f.write(json_sequences)
             f.close()
         except OSError:
-            cherrypy.log(f"Could not open/read file:{self.fname}")
+            cherrypy.log(f"Could not open/read file:{self.config.patterns_file}")
     
     @cherrypy.expose
     def service_start_stop(self):

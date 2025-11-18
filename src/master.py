@@ -44,7 +44,7 @@ if __name__ == "__main__":
     bd.start()
     logger.info('BeatDetector started')
 
-    cp = CommandProcessor.CommandProcessor(config, queue)
+    cp = CommandProcessor.CommandProcessor(config, queue, gpiochip)
     cp.start()
     logger.info('CommandProcessor started')
     
