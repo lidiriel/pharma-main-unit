@@ -1,6 +1,7 @@
 """ In production do not use debug mode
 """
 import re
+import logging
 from enum import auto, StrEnum
 
 SEQUENCE_PATTERN = re.compile(r'sequence\d')
@@ -16,9 +17,9 @@ class Config(object):
         self.beat_min_energy = 1e17
         self.beat_c_factor = 5
         self.beat_interval = 0.33
-        self.beat_debug = False
-        self.beat_full_debug = False
-        self.com_debug = False
+        self.beat_debug = True
+        self.beat_full_debug = True
+        self.log_level = logging.DEBUG
         self.com_serial_port = '/dev/ttyAMA0'
         self.com_serial_baudrate = 57600
         self.sock_file = '/tmp/pharma-ipc.socket'

@@ -35,20 +35,19 @@ class BeatDetector(threading.Thread):
         self.queue = queue
         self.gpiochip=gpiochip
         self.pa = pyaudio.PyAudio()
-        self.logger = logging.getLogger('BeatDetector')
-        self.logger.setLevel(logging.DEBUG)
         self.clk_id = time.CLOCK_REALTIME
         self._running = True
+        logging.info("BeatDetector initialized")
         
     def terminate(self):
         self._running = False
         
     
     def find_input_device(self, name="Loopback"):
-        self.logger.info(f"search for device {name}")
+        logging.info(f"search for device {name}")
         for i in range(self.pa.get_device_count()):
             info = self.pa.get_device_info_by_index(i)
-            self.logger.debug(f"device {i} info {info['name']}")
+            logging.debug(f"device {i} info {info['name']}")
             if name.lower() in info['name'].lower() and info['maxInputChannels'] > 0:
                 return i
         return None
@@ -78,17 +77,17 @@ class BeatDetector(threading.Thread):
         try:
             with open(self.config.patterns_file) as f:
                 data = json.load(f)
-                self.logger.info(f"JSON patterns file content : {data}")
+                logging.info(f"JSON patterns file content : {data}")
         except FileNotFoundError:
-            self.logger.error(f"Error: File not found {self.config.patterns_file}")
+            logging.error(f"Error: File not found {self.config.patterns_file}")
         except json.JSONDecodeError:
-            self.logger.error(f"Error Invalid JSON content {self.config.patterns_file}")
+            logging.error(f"Error Invalid JSON content {self.config.patterns_file}")
         except Exception as e:
-            self.logger.error(f"Unexpected error : {e}")
+            logging.error(f"Unexpected error : {e}")
         device_name = self.config.beat_device_name
         device_index = self.find_input_device(name=device_name)
         if device_index is None:
-            self.logger.error(f"Périphérique d'entrée {device_name} non trouvé. Check asoundrc")
+            logging.error(f"Périphérique d'entrée {device_name} non trouvé. Check asoundrc")
             raise RuntimeError("Périphérique d'entrée {device_name} non trouvé. Check asoundrc")
 
 
@@ -103,7 +102,7 @@ class BeatDetector(threading.Thread):
         energy_history = [deque(maxlen=ENERGY_HISTORY) for _ in range(N_BANDS)]
 
         bands = self.log_frequency_bands()
-        self.logger.debug(f"bands = {bands}")
+        logging.debug(f"bands = {bands}")
         
         # Band filtering according to frequency
         def band_to_freq(index):
@@ -125,11 +124,11 @@ class BeatDetector(threading.Thread):
                 filtered_indices.append(i)
                 filtered_frequency.append((start_freq,end_freq))
                 filtered_band_weight.append(band_weight[i])
-        self.logger.info("### filtered bands")
-        self.logger.info(f"bands = {filtered_bands}")
-        self.logger.info(f"frequency = {filtered_frequency}")
-        self.logger.info(f"indices (band number) = {filtered_indices}")
-        self.logger.info(f"filtered band weight = {filtered_band_weight}")
+        logging.info("### filtered bands")
+        logging.info(f"bands = {filtered_bands}")
+        logging.info(f"frequency = {filtered_frequency}")
+        logging.info(f"indices (band number) = {filtered_indices}")
+        logging.info(f"filtered band weight = {filtered_band_weight}")
 
         prev_beat = perf_counter()
         beats_empty = [0]*N_BANDS
@@ -149,6 +148,8 @@ class BeatDetector(threading.Thread):
                 energy_history[iband].append(energy)
                 if energy < self.config.beat_min_energy:
                     beats_detected[iband] = 0
+                    if self.config.beat_full_debug:
+                        print(f"energy {energy:.2e} < beat_min_energy")
                     continue
     
                 mean = np.mean(energy_history[iband])

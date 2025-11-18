@@ -1,34 +1,23 @@
 import logging
 import queue
 import Config
-import CommandProcessor
-import InterfaceProcessor
-import BeatDetector
-import webctrl
 import Pins
-import cherrypy
 import os
 from logging.handlers import RotatingFileHandler
 import signal
 import time
+import CommandProcessor
+import InterfaceProcessor
+import BeatDetector
 
-# set clean signal killer
-class GracefulKiller:
-    kill_now = False
-    def __init__(self):
-        signal.signal(signal.SIGINT, self.exit_gracefully)
-        signal.signal(signal.SIGTERM, self.exit_gracefully)
 
-def exit_gracefully(self, signum, frame):
-    self.kill_now = True
 
 if __name__ == "__main__":
-    killer = GracefulKiller()
     config = Config.Config()
 
     logger = logging.getLogger()
     fh = RotatingFileHandler(config.logFile, maxBytes=102400, backupCount=2)
-    fh.setLevel(logging.DEBUG)
+    logger.setLevel(config.log_level)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     fh.setFormatter(formatter)
     logger.addHandler(fh)
@@ -45,26 +34,29 @@ if __name__ == "__main__":
         
     ip = InterfaceProcessor.InterfaceProcessor(config, queue, gpiochip)
     ip.start()
-    logger.info('InterfaceProcessor started')
    
     bd = BeatDetector.BeatDetector(config, queue, gpiochip)
     bd.start()
-    logger.info('BeatDetector started')
 
     cp = CommandProcessor.CommandProcessor(config, queue, gpiochip)
     cp.start()
-    logger.info('CommandProcessor started')
-    
-    while not killer.kill_now:
-        time.sleep(1)
-    
-    ip.terminate()
-    bd.terminate()
-    cp.terminate()
+   
+    def robust_signal_handler(signum, frame):
+        # Ignore subsequent SIGINT signals to prevent interruption during cleanup
+        signal.signal(signum, signal.SIG_IGN)
+        perform_cleanup()
+
+    def perform_cleanup():
+        logging.warning("terminate all threads")
+        cp.terminate()
+        bd.terminate()
+        ip.terminate()
+
+    signal.signal(signal.SIGINT, robust_signal_handler)
+
     ip.join(1)
     bd.join(1)
     cp.join(1)
-    logger.info("bye bye")
     
     
     
