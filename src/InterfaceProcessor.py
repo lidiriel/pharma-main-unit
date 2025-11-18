@@ -15,12 +15,14 @@ from Pins import PINS
 class InterfaceProcessor(threading.Thread):
     def __init__(self, config, queue, gpiochip=None):
         super().__init__()
+        self._running = True
         self.status = QUEUE_CMD.PLAY
         self.config = config
         self.queue = queue
         self.gpiochip = gpiochip
         self.logger = logging.getLogger('InterfaceProcessor')
-
+        # start playing
+        self.queue.put(QUEUE_CMD.PLAY)
         self.lcd_status = False
         try:
             self.lcd = I2C_LCD_driver.lcd()
@@ -49,7 +51,9 @@ class InterfaceProcessor(threading.Thread):
         self.ipc_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)   
         self.ipc_socket.bind(self.config.sock_file)
         self.ipc_socket.listen(0)
-        
+    
+    def terminate(self):
+        self._running = False
     
     def get_playing_sequence(self):
         return self.playing_seq_name
@@ -95,11 +99,15 @@ class InterfaceProcessor(threading.Thread):
             self.logger.error(f"ERROR to get ip : {e}")
             return None
     
-    def update_lcd(self):
+    def update_lcd(self, shutdown=False):
         if self.lcd_status:
-            self.lcd.lcd_clear()
-            self.lcd.lcd_display_string(f"compost@{self.myip}", 1)
-            self.lcd.lcd_display_string(f"{self.status} {self.playing_seq_name}", 2)
+            if shutdown:
+                self.lcd.lcd_clear()
+                self.lcd.lcd_display_string(f"shutdown required", 1)
+            else:
+                self.lcd.lcd_clear()
+                self.lcd.lcd_display_string(f"IP:{self.myip}", 1)
+                self.lcd.lcd_display_string(f"{self.status} {self.playing_seq_name}", 2)
             
     
     def run(self):
@@ -110,39 +118,40 @@ class InterfaceProcessor(threading.Thread):
         except Exception as e:
             self.logger.error(f"ERROR to start pwm heart led : {e}")
         
-        self.update_lcd()
-        while True:
-            # Accept 'request'
-            conn, addr = self.ipc_socket.accept()
-            # Process 'request'
-            with conn:
-                self.logger.info(f'Connection by client {addr}')
-                while True:
-                    data = conn.recv(1024)
-                    if not data:
-                        break
-                    ipc_string = pickle.loads(data)
-                    ipc_list = ipc_string.split(':')
-                    if ipc_list[0] == IPC_COMMAND.GET_PLAYING:
-                        data = self.get_playing_sequence()
-                    elif ipc_list[0] == IPC_COMMAND.SET_PLAYING:
-                        value = None
-                        try:
-                            value = ipc_list[1]
-                        except IndexError:
-                            self.logger.error("No value with set_playing command")
+        # Accept 'request'
+        conn, addr = self.ipc_socket.accept()
+        # Process 'request'
+        with conn:
+            self.logger.info(f'Connection by client {addr}')
+            while self._running:
+                data = conn.recv(1024)
+                if not data:
+                    break
+                ipc_string = pickle.loads(data)
+                ipc_list = ipc_string.split(':')
+                if ipc_list[0] == IPC_COMMAND.GET_PLAYING:
+                    data = self.get_playing_sequence()
+                elif ipc_list[0] == IPC_COMMAND.SET_PLAYING:
+                    value = None
+                    try:
+                        value = ipc_list[1]
                         self.set_playing_sequence(value)
                         data = True
-                    elif ipc_list[0] == IPC_COMMAND.IS_PLAYING:
-                        #TODO
-                    elif
-                        #TODO
-                    elif
-                        #TODO
-                    serialized = pickle.dumps(data)
-                    conn.sendall(serialized)
-                    self.update_lcd()
-                
-            
+                    except IndexError:
+                        self.logger.error("No value with set_playing command")
+                    data = False
+                elif ipc_list[0] == IPC_COMMAND.IS_PLAYING:
+                    data = self.status == QUEUE_CMD.PLAY 
+                elif ipc_list[0] == IPC_COMMAND.DO_PAUSE:
+                    self.status = QUEUE_CMD.PAUSE
+                    self.queue.put(QUEUE_CMD.PAUSE)
+                elif ipc_list[0] == IPC_COMMAND.DO_PLAY:
+                    self.status = QUEUE_CMD.PLAY
+                    self.queue.put(QUEUE_CMD.PLAY)
+                serialized = pickle.dumps(data)
+                conn.sendall(serialized)
+                self.update_lcd()
+        self.update_lcd(shutdown=True)
+        
             
     

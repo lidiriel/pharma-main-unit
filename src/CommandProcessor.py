@@ -26,8 +26,8 @@ class CommandProcessor(threading.Thread):
         sbc.gpio_write(gpiochip, PINS['RS485_DE'], 1)
         self.com_serial = serial.Serial(self.config.com_serial_port, baudrate=self.config.com_serial_baudrate)
         
-    def is_running(self):
-        return self._running
+    def terminate(self):
+        self._running = False
 
     def crc8(self, data: bytes) -> int:
         crc = 0x00
@@ -64,7 +64,7 @@ class CommandProcessor(threading.Thread):
         self.sequence_idx = 0
         self.sequence_len = len(self.sequence)
         clk_id = time.CLOCK_REALTIME
-        while True:
+        while self._running:
             (cmd, value) = self.queue.get(block=True)
             try:
                 if not self._running:

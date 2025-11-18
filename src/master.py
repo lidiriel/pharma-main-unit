@@ -9,9 +9,21 @@ import Pins
 import cherrypy
 import os
 from logging.handlers import RotatingFileHandler
+import signal
+import time
 
+# set clean signal killer
+class GracefulKiller:
+    kill_now = False
+    def __init__(self):
+        signal.signal(signal.SIGINT, self.exit_gracefully)
+        signal.signal(signal.SIGTERM, self.exit_gracefully)
+
+def exit_gracefully(self, signum, frame):
+    self.kill_now = True
 
 if __name__ == "__main__":
+    killer = GracefulKiller()
     config = Config.Config()
 
     logger = logging.getLogger()
@@ -42,5 +54,18 @@ if __name__ == "__main__":
     cp = CommandProcessor.CommandProcessor(config, queue, gpiochip)
     cp.start()
     logger.info('CommandProcessor started')
+    
+    while not killer.kill_now:
+        time.sleep(1)
+    
+    ip.terminate()
+    bd.terminate()
+    cp.terminate()
+    ip.join(1)
+    bd.join(1)
+    cp.join(1)
+    logger.info("bye bye")
+    
+    
     
    
