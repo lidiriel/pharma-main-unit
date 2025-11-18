@@ -9,19 +9,24 @@ import pickle
 import subprocess
 import psutil
 from logging.handlers import RotatingFileHandler
-from Config import Config, IPC_COMMAND
+from Config import Config
+from Config import IPC_COMMAND
 
 class Webctrl(object):
     command_list = ['RAND']
     
     def __init__(self):
         self.config = Config()
+        
         self.logger = logging.getLogger()
         self.logger.setLevel(logging.DEBUG)
-        fh = RotatingFileHandler(self.config.weblogFile, maxBytes=102400, backupCount=2)
-        fh.setLevel(logging.DEBUG)
-        self.logger.addHandler(fh)
+        fileHandler = RotatingFileHandler(self.config.weblogFile, maxBytes=102400, backupCount=2)
+        fileHandler.setLevel(logging.DEBUG)
+        self.logger.addHandler(fileHandler)
+        consoleHandler = logging.StreamHandler()
+        self.logger.addHandler(consoleHandler)
         self.logger.info("Webservice Pharma started")
+        
         # Init socket object
         if not os.path.exists(self.config.sock_file):
             self.logger.error(f"File {self.config.sock_file} doesn't exists")
@@ -97,7 +102,7 @@ class Webctrl(object):
     @cherrypy.tools.json_out()
     @cherrypy.expose
     def get_playing(self):
-        value = self.ipc_communication(IPC_COMMAND.GET_PAYING, str)
+        value = self.ipc_communication(IPC_COMMAND.GET_PLAYING, str)
         self.logger.debug(f"get_playing receive {value}")
         return {"name" : value}
     
@@ -182,7 +187,6 @@ class Webctrl(object):
 
 
 if __name__ == '__main__':
-
     conf = {
         '/': {
             'tools.sessions.on': True,

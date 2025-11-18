@@ -4,11 +4,14 @@ import logging
 import json
 import random
 import serial
+import lgpio as sbc
+from Pins import PINS
+from Config import QUEUE_CMD
 
 REGISTER_LED = 0
 
 class CommandProcessor(threading.Thread):
-    def __init__(self, config, queue):
+    def __init__(self, config, queue, gpiochip=None):
         super().__init__()
         self.config = config
         self.queue = queue
@@ -19,13 +22,9 @@ class CommandProcessor(threading.Thread):
         else:
             self.logger.setLevel(logging.ERROR)
 
+        # set RS485 to transmission mode
+        sbc.gpio_write(gpiochip, PINS['RS485_DE'], 1)
         self.com_serial = serial.Serial(self.config.com_serial_port, baudrate=self.config.com_serial_baudrate)
-
-    def pause(self):
-        self._running = False
-        
-    def playing(self):
-        self._running = True
         
     def is_running(self):
         return self._running
@@ -68,10 +67,13 @@ class CommandProcessor(threading.Thread):
         while True:
             (cmd, value) = self.queue.get(block=True)
             try:
-                self.logger.info(f"{cmd} {value}")
                 if not self._running:
+                    if cmd == QUEUE_CMD.PLAY:
+                        self._running = True
                     continue
-                elif cmd == "BEAT":
+                elif cmd == QUEUE_CMD.PAUSE:
+                    self._running = False
+                elif cmd == QUEUE_CMD.BEAT:
                     element = self.sequence[self.sequence_idx]
                     code = 0
                     if element == "RAND":
@@ -86,7 +88,7 @@ class CommandProcessor(threading.Thread):
                     my_time = time.clock_gettime(clk_id) - float(value)
                     self.logger.debug(f"sended code {code:#04x} sending latency {my_time}")
                     self.sequence_idx = (self.sequence_idx + 1) % self.sequence_len
-                elif cmd == "CHG_SEQ":
+                elif cmd == QUEUE_CMD.CHG_SEQ:
                     try:
                         self.logger.info(f"Change sequence to {value}")
                         self.sequence = data['sequences'][value]

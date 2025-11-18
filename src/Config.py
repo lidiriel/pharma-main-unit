@@ -1,7 +1,7 @@
 """ In production do not use debug mode
 """
 import re
-from enum import StrEnum
+from enum import auto, StrEnum
 
 SEQUENCE_PATTERN = re.compile(r'sequence\d')
 
@@ -26,11 +26,17 @@ class Config(object):
         
 
 class IPC_COMMAND(StrEnum):
-    GET_PAYING = 'get_playing'
-    SET_PLAYING = 'set_playing'
-    IS_PLAYING = 'is_playing'
-    DO_PAUSE = 'do_pause'
-    DO_PLAY = 'do_play'
+    GET_PLAYING = auto()
+    SET_PLAYING = auto()
+    IS_PLAYING = auto()
+    DO_PAUSE = auto()
+    DO_PLAY = auto()
+    
+class QUEUE_CMD(StrEnum):
+    BEAT = auto()
+    PAUSE = auto()
+    PLAY = auto()
+    CHG_SEQ = auto()
     
     
         

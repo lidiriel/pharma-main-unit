@@ -8,8 +8,8 @@ import json
 from collections import deque
 from Pins import PINS
 from threading import Thread
-import lgpio
-#import RPi.GPIO as GPIO
+import lgpio as sbc
+from Config import QUEUE_CMD
 
 """ I2S ADC parameters
     Algo parameters
@@ -21,17 +21,11 @@ CHANNELS = 2
 N_BANDS = 32
 ENERGY_HISTORY = 42
 
-REGISTER_LED = 0
-SEQ_NAME = "sequence1"
-
-#gpio_handler = lgpio.gpiochip_open(0)
 
 def visual_beat(gpio_handler):
-    #GPIO.output(PINS['BEAT'], GPIO.HIGH)
-    lgpio.gpio_write(gpio_handler, PINS['BEAT'], 1) 
+    sbc.gpio_write(gpio_handler, PINS['BEAT'], 1)
     time.sleep(0.02)
-    #GPIO.output(PINS['BEAT'], GPIO.LOW)
-    lgpio.gpio_write(gpio_handler, PINS['BEAT'], 0)
+    sbc.gpio_write(gpio_handler, PINS['BEAT'], 0)
 
 
 class BeatDetector(threading.Thread):
@@ -168,7 +162,7 @@ class BeatDetector(threading.Thread):
                 curr_time = time.clock_gettime(self.clk_id)
                 if (curr_time - prev_beat) > self.config.beat_interval:
                     # interval between two beat in seconds (example 180BPM = 0.33s)
-                    self.queue.put(("BEAT",curr_time))
+                    self.queue.put((QUEUE_CMD.BEAT,curr_time))
                     prev_beat = curr_time
                     Thread(target=visual_beat, args=(self.gpiochip,)).start()
                     
