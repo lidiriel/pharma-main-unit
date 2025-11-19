@@ -1,7 +1,8 @@
 [Unit]
 Description="Master process for pharma"
-Wants=network.target
 After=default.target
+After=systemd-udevd.service
+After=serial-getty@ttyAMA0.service
 
 [Service]
 Type=simple
