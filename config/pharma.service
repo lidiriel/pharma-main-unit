@@ -1,21 +1,18 @@
 [Unit]
 Description="Master process for pharma"
-After=default.target
-After=systemd-udevd.service
-After=serial-getty@ttyAMA0.service
+After=network.target
+After=systemd-udev-settle.service
+After=dev-ttyAMA0.device
+Requires=dev-ttyAMA0.device
 
 [Service]
 Type=simple
 User=compost
-GuessMainPID=yes
-ExecStart=python master.py
-ExecStop=kill -SIGINT $mainpid
-Restart=on-failure
+Group=dialout
 WorkingDirectory=/home/compost/pharma-main-unit/src/
-# affichage des log en temps reel dans journactl
+ExecStart=/usr/bin/python3 master.py
+Restart=on-failure
 Environment=PYTHONUNBUFFERED=1
 
 [Install]
 WantedBy=multi-user.target
-
-
