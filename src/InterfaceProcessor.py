@@ -20,10 +20,8 @@ class InterfaceProcessor(threading.Thread):
         self.config = config
         self.queue = queue
         self.gpiochip = gpiochip
-        # logging = logging.getLogger()#'InterfaceProcessor')
-        #logging.setLevel(logging.DEBUG)
         # start playing
-        self.queue.put(QUEUE_CMD.PLAY)
+        self.queue.put((QUEUE_CMD.PLAY, None))
         self.lcd_status = False
         try:
             self.lcd = I2C_LCD_driver.lcd()
@@ -56,6 +54,9 @@ class InterfaceProcessor(threading.Thread):
             self.ipc_socket.listen(0)
         except Exception as e:
             logging.error(f"Socket for IPC error {e}")
+
+        self.myip = self.get_ip("eth0")
+        self.update_lcd()
         logging.info("Interface processor initialized")
     
     def terminate(self):
@@ -69,7 +70,7 @@ class InterfaceProcessor(threading.Thread):
         """
         if SEQUENCE_PATTERN.match(value):
             self.playing_seq_name = value
-            self.queue.put((QUEUE_CMD.CHG_SEQ,value))
+            self.queue.put((QUEUE_CMD.CHG_SEQ, value))
         else:
             logging.error(f"Invalid sequence {value}")
     
@@ -95,7 +96,7 @@ class InterfaceProcessor(threading.Thread):
         if self.lcd_status:
             if shutdown:
                 self.lcd.lcd_clear()
-                self.lcd.lcd_display_string(f"shutdown required", 1)
+                self.lcd.lcd_display_string(f"shutdown", 1)
             else:
                 self.lcd.lcd_clear()
                 self.lcd.lcd_display_string(f"IP:{self.myip}", 1)
@@ -103,7 +104,6 @@ class InterfaceProcessor(threading.Thread):
             
     
     def run(self):
-        self.myip = self.get_ip("eth0")
         try:
             # self.pwm.start(50)  # Start duty cycle 50% for heartbeat
             sbc.tx_pwm(self.gpiochip, PINS['HEART'], 1, 50)
@@ -139,10 +139,10 @@ class InterfaceProcessor(threading.Thread):
                             data = self.status == QUEUE_CMD.PLAY 
                         elif ipc_list[0] == IPC_COMMAND.DO_PAUSE:
                             self.status = QUEUE_CMD.PAUSE
-                            self.queue.put(QUEUE_CMD.PAUSE)
+                            self.queue.put((QUEUE_CMD.PAUSE,None))
                         elif ipc_list[0] == IPC_COMMAND.DO_PLAY:
                             self.status = QUEUE_CMD.PLAY
-                            self.queue.put(QUEUE_CMD.PLAY)
+                            self.queue.put((QUEUE_CMD.PLAY,None))
                         serialized = pickle.dumps(data)
                         conn.sendall(serialized)
                         self.update_lcd()

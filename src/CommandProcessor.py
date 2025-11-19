@@ -5,6 +5,8 @@ import json
 import random
 import serial
 import lgpio as sbc
+import queue
+from queue import ShutDown
 from Pins import PINS
 from Config import QUEUE_CMD
 
@@ -16,6 +18,7 @@ class CommandProcessor(threading.Thread):
         self.config = config
         self.queue = queue
         self._running = True
+        self._playing = True
 
         # set RS485 to transmission mode
         sbc.gpio_write(gpiochip, PINS['RS485_DE'], 1)
@@ -63,16 +66,18 @@ class CommandProcessor(threading.Thread):
         clk_id = time.CLOCK_REALTIME
         while self._running:
             try:
-                (cmd, value) = self.queue.get(block=True)
+                cmd_data = self.queue.get(block=True)
+                if type(cmd_data) != tuple:
+                    logging.error(f"Invalid command data {cmd_data}")
+                    continue
+                (cmd, value) = cmd_data
                 logging.debug(f" queue cmd {cmd} {value}")
                 try:
-                    if not self._running:
+                    if not self._playing:
                         if cmd == QUEUE_CMD.PLAY:
-                            self._running = True
+                            self._playing = True
                         continue
-                    elif cmd == QUEUE_CMD.PAUSE:
-                        self._running = False
-                    elif cmd == QUEUE_CMD.BEAT:
+                    if cmd == QUEUE_CMD.BEAT:
                         element = self.sequence[self.sequence_idx]
                         code = 0
                         if element == "RAND":
@@ -87,6 +92,8 @@ class CommandProcessor(threading.Thread):
                         my_time = time.clock_gettime(clk_id) - float(value)
                         logging.debug(f"sended code {code:#04x} sending latency {my_time}")
                         self.sequence_idx = (self.sequence_idx + 1) % self.sequence_len
+                    elif cmd == QUEUE_CMD.PAUSE:
+                        self._playing = False
                     elif cmd == QUEUE_CMD.CHG_SEQ:
                         try:
                             logging.info(f"Change sequence to {value}")
@@ -99,6 +106,8 @@ class CommandProcessor(threading.Thread):
                             self.sequence = ["RAND"]
                             self.sequence_idx = 0
                             self.sequence_len = len(self.sequence)
+                    else:
+                        logging.warning(f"Invalid command {cmd} during playing")
                 except Exception as e:
                     logging.error(f"ERROR when processing pattern {e}")
             except ShutDown:

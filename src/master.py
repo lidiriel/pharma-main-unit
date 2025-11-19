@@ -54,9 +54,9 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, robust_signal_handler)
 
-    ip.join(1)
-    bd.join(1)
-    cp.join(1)
+    ip.join()
+    bd.join()
+    cp.join()
     
     
     
