@@ -20,7 +20,7 @@ if __name__ == "__main__":
     import time
 
     instrument = minimalmodbus.Instrument(port='/dev/ttyAMA0', slaveaddress=0)
-    instrument.serial.baudrate = 76800
+    instrument.serial.baudrate = 57600
     instrument.serial.bytesize = 8
     instrument.serial.parity = minimalmodbus.serial.PARITY_NONE
     instrument.serial.stopbits = 1

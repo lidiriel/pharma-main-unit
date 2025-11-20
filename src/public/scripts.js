@@ -15,7 +15,7 @@ $(function() {
     var $defaultButton = $('#seq_default');
     var $startStopButton = $('#service_start_stop');
     var $restartButton = $('#service_restart');
-	var $reloadButton = $('#reload_config');
+    var $reloadButton = $('#reload_config');
     var $dialogMessage = $('#dialog-message');
     var $checkButton = $('#check-button');
     var $defaultSequenceName = $('#default_sequence_name');
@@ -338,6 +338,8 @@ $(function() {
             "sequence_name": ""
         });
         posting.done(function(data) {
+	    $progSelect.find('option').remove();
+	    $seqSelect.find('option').remove();
             for (seq_name in data) {
                 $progSelect.append(new Option(seq_name, seq_name));
                 $seqSelect.append(new Option(seq_name, seq_name));
@@ -556,7 +558,6 @@ $(function() {
         var posting = $.post("/communication_change");
         posting.done(function(data) {
             console.log("communication change (pause, play)");
-            myDialog("pause/play", "Communication with cross change.");
         }).fail(function() {
             alert("error please retry.");
         });
@@ -575,17 +576,21 @@ $(function() {
             alert("error please retry.");
         });
         communicationStatus();
+	getDefaultSequenceName();
+	loadAllSequence();
+	getplayingSequence();
     });
 	
-	$reloadButton.click(function(event)) {
-		event.preventDefault();
-		var posting = $.post("/reload_config");
-			posting.done(function(data) {
-				myDialog(sequence_name, "Config reloaded.");
-				loadAllSequences();
-				getDefaultSequenceName();
-			});
-	}
+    $reloadButton.click(function(event) {
+	event.preventDefault();
+	var posting = $.post("/reload_config");
+	posting.done(function(data) {
+	   myDialog(sequence_name, "Config reloaded.");
+	});
+	getDefaultSequenceName();
+	loadAllSequences();
+	getPlayingSequence();
+    });
 
     $checkButton.click(function(event) {
         communicationStatus();
