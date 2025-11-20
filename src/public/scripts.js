@@ -15,6 +15,7 @@ $(function() {
     var $defaultButton = $('#seq_default');
     var $startStopButton = $('#service_start_stop');
     var $restartButton = $('#service_restart');
+	var $reloadButton = $('#reload_config');
     var $dialogMessage = $('#dialog-message');
     var $checkButton = $('#check-button');
     var $defaultSequenceName = $('#default_sequence_name');
@@ -575,6 +576,16 @@ $(function() {
         });
         communicationStatus();
     });
+	
+	$reloadButton.click(function(event)) {
+		event.preventDefault();
+		var posting = $.post("/reload_config");
+			posting.done(function(data) {
+				myDialog(sequence_name, "Config reloaded.");
+				loadAllSequences();
+				getDefaultSequenceName();
+			});
+	}
 
     $checkButton.click(function(event) {
         communicationStatus();

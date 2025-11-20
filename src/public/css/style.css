@@ -128,7 +128,8 @@ body.blue-leds #rows-list .item.hover {
 	margin: 0 5px;
 }
 #service_start_stop,
-#service_restart {
+#service_restart,
+#reload_config {
 	width: 115px;
 	height: 30px;
 	margin: 7px 0 0 10px;
