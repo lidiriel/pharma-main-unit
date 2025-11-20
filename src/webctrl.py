@@ -11,6 +11,7 @@ import select
 from logging.handlers import RotatingFileHandler
 from Config import Config
 from Config import IPC_COMMAND
+from jaraco.functools import except_
 
 class Webctrl(object):
     command_list = ['RAND']
@@ -24,19 +25,7 @@ class Webctrl(object):
         logger.addHandler(fileHandler)
         consoleHandler = logging.StreamHandler()
         logger.addHandler(consoleHandler)
-        self.ipc_init()
         logging.info("Webservice Pharma started")
-
-    def ipc_init(self):
-        # Init socket object
-        if not os.path.exists(self.config.sock_file):
-            logging.error(f"File {self.config.sock_file} doesn't exists")
-            sys.exit(-1)
- 
-        self.ipc = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        self.ipc.settimeout(2)
-        self.ipc.connect(self.config.sock_file)
-    
     
     def load_cross_config(self, fname="../config/cross.json"):
         cross_config = {}
@@ -88,29 +77,32 @@ class Webctrl(object):
         except OSError:
             logging.error(f"Could not open/read file:{self.config.patterns_file}")
     
-    def is_socket_alive(self):
-        readable, _, exceptional = select.select([self.ipc], [], [self.ipc], 1)
-        if self.ipc in exceptional:
-            logging.warning("Connection has been reset by the peer.")
-            return False
-        return bool(readable)
-    
-
     def ipc_communication(self, value, mytype):
-        if not self.is_socket_alive():
-            self.ipc.close()
-            self.ipc_init()
-        received_object = None
-        try:
-            serialized = pickle.dumps(value)
-            self.ipc.sendall(serialized)
-            data = self.ipc.recv(1024)
-            received_object = pickle.loads(data)
-        except Exception as e:
-            logging.error(f"Error on IPC communication : {e}")
-        if type(received_object) != mytype:
-            logging.error(f"Invalid type for received object {type(received_object)}") 
-        return received_object
+        # Init socket object
+        if not os.path.exists(self.config.sock_file):
+            logging.error(f"File {self.config.sock_file} doesn't exists -> exit")
+            sys.exit(-1)
+        
+        retry = 1
+        while retry >= 0:
+            try:
+                received_object = None
+                with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
+                    s.settimeout(2)
+                    s.connect(self.config.sock_file)
+                    serialized = pickle.dumps(value)
+                    s.sendall(serialized)
+                    data = self.ipc.recv(1024)
+                    received_object = pickle.loads(data)
+                    if type(received_object) != mytype:
+                        logging.error(f"Invalid type for received object {type(received_object)}")
+                return received_object
+            except socket.error as e:
+                logging.error(f"IPC communication ERROR {e}")
+                retry = retry - 1
+        logging.error("IPC failed -> exit")
+        sys.exit(-1)
+        
     
     @cherrypy.tools.json_out()
     @cherrypy.expose
@@ -151,30 +143,12 @@ class Webctrl(object):
     @cherrypy.expose
     def service_restart(self):
         logging.info(f"restart pharma main thread")
-        found = False
         try:
             subprocess.run(["sudo", "systemctl", "restart", self.config.service_name])
         except Exception as e:
             logging.error(f"restart exception {e}")
         logging.info("main service restarted")
-        return
-        #for proc in psutil.process_iter():
-        #    try:
-        #        pname = proc.name()
-        #        logging.debug(f"proc name {pname}")
-        #        if pname == self.config.service_name:
-        #            found = True
-        #            try:
-        #                proc.terminate()
-        #                print(f"{self.config.service_name} service has been stopped")
-        #                subprocess.run(["systemctl", "start", self.config.service_name])
-        #                print(f"{self.config.service_name} service has been started")
-        #            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess) as e:
-        #                logging.error(f"service restart error {e}")
-        #    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-        #        pass
-        #if not found:
-        #    logging.error(f"service not found : {self.config.service_name}")
+
             
     @cherrypy.tools.json_out()
     @cherrypy.expose
@@ -182,6 +156,7 @@ class Webctrl(object):
         value = self.ipc_communication(IPC_COMMAND.IS_PLAYING, bool)
         logging.info(f"Is communication playing mode ? {value}")
         return {"status" : value}
+
 
     @cherrypy.tools.json_out()
     @cherrypy.expose
