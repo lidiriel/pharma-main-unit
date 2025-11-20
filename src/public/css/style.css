@@ -115,6 +115,7 @@ body.blue-leds #rows-list .item.hover {
 #deleteall-button,
 #hex_save,
 #prog_list,
+#seq_list,
 #insert-button {
     width: 95px;
     height: 30px;

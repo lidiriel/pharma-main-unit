@@ -18,18 +18,18 @@ class Webctrl(object):
     def __init__(self):
         self.config = Config()
         
-        self.logger = logging.getLogger()
-        self.logger.setLevel(logging.DEBUG)
+        logger = logging.getLogger()
+        logger.setLevel(logging.DEBUG)
         fileHandler = RotatingFileHandler(self.config.weblogFile, maxBytes=102400, backupCount=2)
         fileHandler.setLevel(logging.DEBUG)
-        self.logger.addHandler(fileHandler)
+        logger.addHandler(fileHandler)
         consoleHandler = logging.StreamHandler()
-        self.logger.addHandler(consoleHandler)
-        self.logger.info("Webservice Pharma started")
+        logger.addHandler(consoleHandler)
+        logging.info("Webservice Pharma started")
         
         # Init socket object
         if not os.path.exists(self.config.sock_file):
-            self.logger.error(f"File {self.config.sock_file} doesn't exists")
+            logging.error(f"File {self.config.sock_file} doesn't exists")
             sys.exit(-1)
  
         self.ipc = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -41,7 +41,7 @@ class Webctrl(object):
         try:
             config_file = open(fname, 'rb')
         except OSError:
-            self.logger.error(f"Could not open/read file:{fname}")
+            logging.error(f"Could not open/read file:{fname}")
         with config_file:
             cross_config = json.load(config_file)
         return cross_config
@@ -58,12 +58,12 @@ class Webctrl(object):
             cherrypy.session['cross_config'] = cross_config
         else:
             cross_config = cherrypy.session['cross_config']
-        self.logger.info(f"{cross_config}")
+        logging.info(f"{cross_config}")
         return cross_config
 
     @cherrypy.expose
     def save(self, sequence_name="", sequence_value=""):
-        self.logger.info(f" prog-list {sequence_name}  hex_list {sequence_value}")
+        logging.info(f" prog-list {sequence_name}  hex_list {sequence_value}")
         cross_config = self.update_cherrypy_session()
         new_sequence = sequence_value.split(',')
         def convert(item):
@@ -71,20 +71,20 @@ class Webctrl(object):
                 try:
                     item = hex(int(item, 16))
                 except ValueError as error:
-                    self.logger.error(f"Invalid value for hex conversion {item}")
+                    logging.error(f"Invalid value for hex conversion {item}")
                     item = '0x0000'
             return item
         new_sequence = [convert(item) for item in new_sequence]
         cross_config['sequences'][sequence_name] = new_sequence
         cherrypy.session['cross_config'] = cross_config
-        self.logger.info(f"new sequence {new_sequence}")
+        logging.info(f"new sequence {new_sequence}")
         try:
             json_cross_config = json.dumps(cross_config)
             f = open(self.config.patterns_file, "w")
             f.write(json_cross_config)
             f.close()
         except OSError:
-            self.logger.error(f"Could not open/read file:{self.config.patterns_file}")
+            logging.error(f"Could not open/read file:{self.config.patterns_file}")
     
     def ipc_communication(self, value, mytype):
         received_object = None
@@ -94,27 +94,27 @@ class Webctrl(object):
             data = self.ipc.recv(1024)
             received_object = pickle.loads(data)
         except Exception as e:
-            self.logger.error(f"Error on IPC communication : {e}")
+            logging.error(f"Error on IPC communication : {e}")
         if type(received_object) != mytype:
-            self.logger.error(f"Invalid type for received object {type(received_object)}") 
+            logging.error(f"Invalid type for received object {type(received_object)}") 
         return received_object
     
     @cherrypy.tools.json_out()
     @cherrypy.expose
     def get_playing(self):
         value = self.ipc_communication(IPC_COMMAND.GET_PLAYING, str)
-        self.logger.debug(f"get_playing receive {value}")
+        logging.debug(f"get_playing receive {value}")
         return {"name" : value}
     
     @cherrypy.expose
     def set_playing(self, sequence_name=""):
         value = self.ipc_communication(f'{IPC_COMMAND.SET_PLAYING}:{sequence_name}', bool)
         if not value:
-            self.logger.error("Error on set playing")
+            logging.error("Error on set playing")
     
     @cherrypy.expose     
     def set_default(self, sequence_name=""):
-        self.logger.info(f"set sequence {sequence_name} to default")
+        logging.info(f"set sequence {sequence_name} to default")
         cross_config = self.update_cherrypy_session()
         cross_config["default"] = sequence_name
         try:
@@ -123,21 +123,21 @@ class Webctrl(object):
             f.write(json_sequences)
             f.close()
         except OSError:
-            self.logger.error(f"Could not open/read file:{self.config.patterns_file}")
+            logging.error(f"Could not open/read file:{self.config.patterns_file}")
     
     @cherrypy.expose
     def communication_change(self):
-        self.logger.info(f"start/stop command transmission")
+        logging.info(f"play/pause command transmission")
         if self.ipc_communication(IPC_COMMAND.IS_PLAYING, bool):
-            self.logger.info(f"command processor is running -> pause")
+            logging.info(f"command processor is running -> pause")
             self.ipc_communication(IPC_COMMAND.DO_PAUSE, bool)
         else:
-            self.logger.info(f"command processor is not running -> playing")
-            self.command_processor.playing(IPC_COMMAND.DO_PLAY, bool)
+            logging.info(f"command processor is not running -> playing")
+            self.ipc_communication(IPC_COMMAND.DO_PLAY, bool)
             
     @cherrypy.expose
     def service_restart(self):
-        self.logger.info(f"restart pharma main thread")
+        logging.info(f"restart pharma main thread")
         found = False
         for proc in psutil.process_iter():
             try:
@@ -149,17 +149,17 @@ class Webctrl(object):
                         subprocess.run(["systemctl", "start", self.config.service_name])
                         print(f"{self.config.service_name} service has been started")
                     except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess) as e:
-                        self.logger.error(f"service restart error {e}")
+                        logging.error(f"service restart error {e}")
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
         if not found:
-            self.logger.error(f"service not found : {self.config.service_name}")
+            logging.error(f"service not found : {self.config.service_name}")
             
     @cherrypy.tools.json_out()
     @cherrypy.expose
     def communication_status(self):
         value = self.ipc_communication(IPC_COMMAND.IS_PLAYING, bool)
-        self.logger.info(f"Is beat_detector thread alive ? {value}")
+        logging.info(f"Is beat_detector thread alive ? {value}")
         return {"status" : value}
 
     @cherrypy.tools.json_out()
@@ -167,7 +167,7 @@ class Webctrl(object):
     def get_default_sequence_name(self):
         cross_config = self.update_cherrypy_session()
         value = cross_config['default']
-        self.logger.info(f"get default sequence name {value}")
+        logging.info(f"get default sequence name {value}")
         return {"name" : value}
 
     
@@ -181,7 +181,7 @@ class Webctrl(object):
         elif len(sequence_name) != 0:
             out = cross_config['sequences'].get(sequence_name, ["0x0000"])
             
-        self.logger.info(f"json out {out}")
+        logging.info(f"json out {out}")
         return out
     
 

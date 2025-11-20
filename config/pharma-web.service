@@ -1,6 +1,6 @@
 [Unit]
 Description="Web interface process for pharma"
-Wants=network.target
+After=network.target
 # start after pharma for inter process communication with socket
 After=pharma.service
 
