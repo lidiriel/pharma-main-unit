@@ -134,15 +134,17 @@ class InterfaceProcessor(threading.Thread):
                                 data = True
                             except IndexError:
                                 logging.error("No value with set_playing command")
-                            data = False
+                                data = False
                         elif ipc_list[0] == IPC_COMMAND.IS_PLAYING:
                             data = self.status == QUEUE_CMD.PLAY 
                         elif ipc_list[0] == IPC_COMMAND.DO_PAUSE:
                             self.status = QUEUE_CMD.PAUSE
                             self.queue.put((QUEUE_CMD.PAUSE,None))
+                            data = None
                         elif ipc_list[0] == IPC_COMMAND.DO_PLAY:
                             self.status = QUEUE_CMD.PLAY
                             self.queue.put((QUEUE_CMD.PLAY,None))
+                            data = None
                         serialized = pickle.dumps(data)
                         conn.sendall(serialized)
                         self.update_lcd()

@@ -7,7 +7,7 @@ import socket
 import sys
 import pickle
 import subprocess
-import psutil
+import select
 from logging.handlers import RotatingFileHandler
 from Config import Config
 from Config import IPC_COMMAND
@@ -21,18 +21,20 @@ class Webctrl(object):
         logger = logging.getLogger()
         logger.setLevel(logging.DEBUG)
         fileHandler = RotatingFileHandler(self.config.weblogFile, maxBytes=102400, backupCount=2)
-        fileHandler.setLevel(logging.DEBUG)
         logger.addHandler(fileHandler)
         consoleHandler = logging.StreamHandler()
         logger.addHandler(consoleHandler)
+        self.ipc_init()
         logging.info("Webservice Pharma started")
-        
+
+    def ipc_init(self):
         # Init socket object
         if not os.path.exists(self.config.sock_file):
             logging.error(f"File {self.config.sock_file} doesn't exists")
             sys.exit(-1)
  
         self.ipc = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        self.ipc.settimeout(2)
         self.ipc.connect(self.config.sock_file)
     
     
@@ -86,7 +88,18 @@ class Webctrl(object):
         except OSError:
             logging.error(f"Could not open/read file:{self.config.patterns_file}")
     
+    def is_socket_alive(self):
+        readable, _, exceptional = select.select([self.ipc], [], [self.ipc], 1)
+        if self.ipc in exceptional:
+            logging.warning("Connection has been reset by the peer.")
+            return False
+        return bool(readable)
+    
+
     def ipc_communication(self, value, mytype):
+        if not self.is_socket_alive():
+            self.ipc.close()
+            self.ipc_init()
         received_object = None
         try:
             serialized = pickle.dumps(value)
@@ -130,36 +143,44 @@ class Webctrl(object):
         logging.info(f"play/pause command transmission")
         if self.ipc_communication(IPC_COMMAND.IS_PLAYING, bool):
             logging.info(f"command processor is running -> pause")
-            self.ipc_communication(IPC_COMMAND.DO_PAUSE, bool)
+            self.ipc_communication(IPC_COMMAND.DO_PAUSE, type(None))
         else:
             logging.info(f"command processor is not running -> playing")
-            self.ipc_communication(IPC_COMMAND.DO_PLAY, bool)
+            self.ipc_communication(IPC_COMMAND.DO_PLAY, type(None))
             
     @cherrypy.expose
     def service_restart(self):
         logging.info(f"restart pharma main thread")
         found = False
-        for proc in psutil.process_iter():
-            try:
-                if proc.name() == self.config.service_name:
-                    found = True
-                    try:
-                        proc.terminate()
-                        print(f"{self.config.service_name} service has been stopped")
-                        subprocess.run(["systemctl", "start", self.config.service_name])
-                        print(f"{self.config.service_name} service has been started")
-                    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess) as e:
-                        logging.error(f"service restart error {e}")
-            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-                pass
-        if not found:
-            logging.error(f"service not found : {self.config.service_name}")
+        try:
+            subprocess.run(["sudo", "systemctl", "restart", self.config.service_name])
+        except Exception as e:
+            logging.error(f"restart exception {e}")
+        logging.info("main service restarted")
+        return
+        #for proc in psutil.process_iter():
+        #    try:
+        #        pname = proc.name()
+        #        logging.debug(f"proc name {pname}")
+        #        if pname == self.config.service_name:
+        #            found = True
+        #            try:
+        #                proc.terminate()
+        #                print(f"{self.config.service_name} service has been stopped")
+        #                subprocess.run(["systemctl", "start", self.config.service_name])
+        #                print(f"{self.config.service_name} service has been started")
+        #            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess) as e:
+        #                logging.error(f"service restart error {e}")
+        #    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+        #        pass
+        #if not found:
+        #    logging.error(f"service not found : {self.config.service_name}")
             
     @cherrypy.tools.json_out()
     @cherrypy.expose
     def communication_status(self):
         value = self.ipc_communication(IPC_COMMAND.IS_PLAYING, bool)
-        logging.info(f"Is beat_detector thread alive ? {value}")
+        logging.info(f"Is communication playing mode ? {value}")
         return {"status" : value}
 
     @cherrypy.tools.json_out()
