@@ -32,12 +32,14 @@ class IPC_COMMAND(StrEnum):
     IS_PLAYING = auto()
     DO_PAUSE = auto()
     DO_PLAY = auto()
+    RELOAD_CONFIG = auto()
     
 class QUEUE_CMD(StrEnum):
     BEAT = auto()
     PAUSE = auto()
     PLAY = auto()
     CHG_SEQ = auto()
+    RELOAD = auto()
     
     
         

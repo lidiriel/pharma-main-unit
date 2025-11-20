@@ -73,7 +73,7 @@ class InterfaceProcessor(threading.Thread):
             self.queue.put((QUEUE_CMD.CHG_SEQ, value))
         else:
             logging.error(f"Invalid sequence {value}")
-    
+            
     def get_ip(self, ifname):
         """ if not connected to network
         """
@@ -144,6 +144,9 @@ class InterfaceProcessor(threading.Thread):
                         elif ipc_list[0] == IPC_COMMAND.DO_PLAY:
                             self.status = QUEUE_CMD.PLAY
                             self.queue.put((QUEUE_CMD.PLAY,None))
+                            data = None
+                        elif ipc_list[0] == IPC_COMMAND.RELOAD_CONFIG:
+                            self.queue.put((QUEUE_CMD.RELOAD,None))
                             data = None
                         serialized = pickle.dumps(data)
                         conn.sendall(serialized)

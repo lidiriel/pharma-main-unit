@@ -46,8 +46,8 @@ class CommandProcessor(threading.Thread):
         frame = bytes([0xAA]) + payload + bytes([crc, 0x55])
         self.com_serial.write(frame)
 
-    def run(self):
-        data = None
+
+    def load_patterns(self):
         try:
             with open(self.config.patterns_file) as f:
                 data = json.load(f)
@@ -58,7 +58,10 @@ class CommandProcessor(threading.Thread):
             logging.error(f"Error Invalid JSON content {self.config.patterns_file}")
         except Exception as e:
             logging.error(f"Unexpected error : {e}")
-            
+        return data, e
+
+    def run(self):
+        data, e = self.load_patterns()
         # default sequence if not loaded at startup
         self.sequence = ["RAND"]
         self.sequence_idx = 0
@@ -106,6 +109,8 @@ class CommandProcessor(threading.Thread):
                             self.sequence = ["RAND"]
                             self.sequence_idx = 0
                             self.sequence_len = len(self.sequence)
+                    elif cmd == QUEUE_CMD.RELOAD:
+                        data, e = self.load_patterns()
                     else:
                         logging.warning(f"Invalid command {cmd} during playing")
                 except Exception as e:

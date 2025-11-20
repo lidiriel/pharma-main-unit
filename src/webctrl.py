@@ -77,6 +77,10 @@ class Webctrl(object):
         except OSError:
             logging.error(f"Could not open/read file:{self.config.patterns_file}")
     
+    """ ipc communication function
+        force retry on error
+        close socket after each call
+    """
     def ipc_communication(self, value, mytype):
         # Init socket object
         if not os.path.exists(self.config.sock_file):
@@ -85,20 +89,23 @@ class Webctrl(object):
         
         retry = 1
         while retry >= 0:
+            s = None
             try:
                 received_object = None
-                with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
-                    s.settimeout(2)
-                    s.connect(self.config.sock_file)
-                    serialized = pickle.dumps(value)
-                    s.sendall(serialized)
-                    data = self.ipc.recv(1024)
-                    received_object = pickle.loads(data)
-                    if type(received_object) != mytype:
-                        logging.error(f"Invalid type for received object {type(received_object)}")
+                s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+                s.settimeout(2)
+                s.connect(self.config.sock_file)
+                serialized = pickle.dumps(value)
+                s.sendall(serialized)
+                data = s.recv(1024)
+                received_object = pickle.loads(data)
+                if type(received_object) != mytype:
+                    logging.error(f"Invalid type for received object {type(received_object)}")
+                s.close()
                 return received_object
             except socket.error as e:
                 logging.error(f"IPC communication ERROR {e}")
+                s.close()
                 retry = retry - 1
         logging.error("IPC failed -> exit")
         sys.exit(-1)
@@ -148,7 +155,11 @@ class Webctrl(object):
         except Exception as e:
             logging.error(f"restart exception {e}")
         logging.info("main service restarted")
-
+    
+    @cherrypy.expose 
+    def reload_config(self):
+        logging.info(f"Reload config")
+        self.ipc_communication(IPC_COMMAND.RELOAD_CONFIG, type(None))
             
     @cherrypy.tools.json_out()
     @cherrypy.expose
