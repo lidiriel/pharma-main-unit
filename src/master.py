@@ -42,7 +42,7 @@ if __name__ == "__main__":
     cp = CommandProcessor.CommandProcessor(config, queue, gpiochip)
     cp.start()
 
-    dp = DmxProcessor(config)
+    dp = DmxProcessor.DmxProcessor(config)
     dp.start()
    
     def robust_signal_handler(signum, frame):
