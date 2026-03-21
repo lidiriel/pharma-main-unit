@@ -9,6 +9,7 @@ import time
 import CommandProcessor
 import InterfaceProcessor
 import BeatDetector
+import DmxProcessor
 
 
 
@@ -40,6 +41,9 @@ if __name__ == "__main__":
 
     cp = CommandProcessor.CommandProcessor(config, queue, gpiochip)
     cp.start()
+
+    dp = DmxProcessor(config)
+    dp.start()
    
     def robust_signal_handler(signum, frame):
         # Ignore subsequent SIGINT signals to prevent interruption during cleanup
@@ -51,12 +55,14 @@ if __name__ == "__main__":
         cp.terminate()
         bd.terminate()
         ip.terminate()
+        dp.terminate()
 
     signal.signal(signal.SIGINT, robust_signal_handler)
 
     ip.join()
     bd.join()
     cp.join()
+    dp.join()
     
     
     

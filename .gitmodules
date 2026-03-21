@@ -1,0 +1,3 @@
+[submodule "2-CH-RS485-HAT"]
+	path = 2-CH-RS485-HAT
+	url = git@github.com:lidiriel/2-CH-RS485-HAT.git

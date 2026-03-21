@@ -24,6 +24,11 @@ class Config(object):
         self.com_serial_baudrate = 57600
         self.sock_file = '/tmp/pharma-ipc.socket'
         self.service_name = 'pharma.service'
+        self.com_dmx = '/dev/ttyXXX'
+        self.com_cross = '/dev/ttyXXX'
+        self.com_cross_baudrate = 57600
+        self.dmx_channels_start = 1
+        
         
 
 class IPC_COMMAND(StrEnum):
